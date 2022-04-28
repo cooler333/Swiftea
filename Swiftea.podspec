@@ -9,7 +9,7 @@
 Pod::Spec.new do |s|
   s.name             = 'Swiftea'
   s.version          = '0.1.0'
-  s.summary          = 'A short description of Swiftea.'
+  s.summary          = 'Swiftea is a Swift implementation of The Elm Arcitecture (TEA) design pattern'
 
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
@@ -18,10 +18,10 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+Swiftea is a Swift implementation of The Elm Arcitecture (TEA) design pattern. It's simple, It's use Combine, It's straightforward. Just as TEA Design pattern.
                        DESC
 
-  s.homepage         = 'https://github.com/Dmitrii Coolerov/Swiftea'
+  s.homepage         = 'https://github.com/cooler333/Swiftea'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Dmitrii Coolerov' => 'utm4@mail.ru' }
@@ -32,6 +32,7 @@ TODO: Add long description of the pod here.
 
   s.source_files = 'Swiftea/Classes/**/*'
   
+  s.swift_versions = ["5.0"]
   # s.resource_bundles = {
   #   'Swiftea' => ['Swiftea/Assets/*.png']
   # }
