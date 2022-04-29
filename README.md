@@ -17,7 +17,7 @@ pod 'Swiftea'
 
 ## Author
 
-Dmitrii Coolerov, utm4@mail.ru
+Dmitrii Coolerov, coolerov333@gmail.com
 
 ## License
 
