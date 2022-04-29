@@ -7,7 +7,6 @@
 
 import Combine
 import Foundation
-import SwiftUI
 
 public final class CommandHandler<State, Command, Event, Environment> {
     private let reduce: (State, Command, Environment) -> AnyPublisher<Event, Never>

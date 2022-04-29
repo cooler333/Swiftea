@@ -5,8 +5,8 @@
 //  Created by Dmitrii Coolerov on 28.04.2022.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 public final class Store<State, Event, Command, Environment> {
     public let statePublisher = PassthroughSubject<State, Never>()
