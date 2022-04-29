@@ -22,7 +22,8 @@ public final class ViewStore<UIState, UIEvent> {
         // TODO: Use merge/flatMap instead
         store.statePublisher.map { value in
             stateMapper(value)
-        }.sink { state in
+        }.sink { [weak self] state in
+            guard let self = self else { return }
             self.statePublisher.send(state)
         }.store(in: &cancellable)
 

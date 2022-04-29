@@ -64,7 +64,8 @@ public final class Store<State, Event, Command, Environment> {
         if Thread.isMainThread {
             statePublisher.send(state)
         } else {
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
                 self.statePublisher.send(state)
             }
         }
@@ -77,9 +78,11 @@ public final class Store<State, Event, Command, Environment> {
                 state: state
             )
             .sink(
-                receiveValue: { event in
+                receiveValue: { [weak self] event in
+                    guard let self = self else { return }
                     let next = self.reducer.dispatch(state: self.state, event: event)
-                    self.eventQueue.async {
+                    self.eventQueue.async { [weak self] in
+                        guard let self = self else { return }
                         self.dispatch(next)
                     }
                 }

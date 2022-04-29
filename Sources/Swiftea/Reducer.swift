@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class Reducer<State, Event, Command> {
+public struct Reducer<State, Event, Command> {
     private let reduce: (State, Event) -> Next<State, Command>
 
     public init(
