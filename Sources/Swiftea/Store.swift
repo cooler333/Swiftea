@@ -72,14 +72,19 @@ public final class Store<State, Event, Command, Environment> {
 
     private func dispatchCommands(commands: [Command]) {
         commands.forEach { command in
-            commandHandler.dispatch(command: command, state: state).sink(
+            commandHandler.dispatch(
+                command: command,
+                state: state
+            )
+            .sink(
                 receiveValue: { event in
                     let next = self.reducer.dispatch(state: self.state, event: event)
                     self.eventQueue.async {
                         self.dispatch(next)
                     }
                 }
-            ).store(in: &store)
+            )
+            .store(in: &store)
         }
     }
 }

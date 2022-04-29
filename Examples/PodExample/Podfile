@@ -3,7 +3,7 @@ use_frameworks!
 platform :ios, '13.0'
 
 target 'Swiftea_Example' do
-  pod 'Swiftea', :path => '../'
+  pod 'Swiftea', :path => '../../', testspecs: ["Tests"]
 
   target 'Swiftea_Tests' do
     inherit! :search_paths

@@ -30,14 +30,19 @@ Swiftea is a Swift implementation of The Elm Arcitecture (TEA) design pattern. I
 
   s.ios.deployment_target = '13.0'
 
-  s.source_files = 'Swiftea/Classes/**/*'
+  s.source_files = 'Sources/**/*.swift'
   
   s.swift_versions = ["5.0"]
-  # s.resource_bundles = {
-  #   'Swiftea' => ['Swiftea/Assets/*.png']
-  # }
+  s.resource_bundles = {
+    'Swiftea' => ['Sources/Swiftea/Resources/**/*.{txt}']
+  }
 
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
+
+  s.test_spec 'Tests' do |test_spec|
+    test_spec.source_files = 'Tests/SwifteaTests/**/*.swift'
+    # test_spec.dependency 'OCMock' # This dependency will only be linked with your tests.
+  end  
 end
