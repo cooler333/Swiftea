@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'Swiftea'
-  s.version          = '0.1.1'
+  s.version          = '0.1.2'
   s.summary          = 'Swiftea is a Swift implementation of The Elm Arcitecture (TEA) design pattern'
 
 # This description is used to generate tags and improve search results.
