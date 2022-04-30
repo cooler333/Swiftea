@@ -8,6 +8,7 @@
 import Combine
 import Foundation
 
+
 public final class Store<State, Event, Command, Environment> {
     public let statePublisher = PassthroughSubject<State, Never>()
 
@@ -17,7 +18,9 @@ public final class Store<State, Event, Command, Environment> {
     private let commandHandler: CommandHandler<State, Command, Event, Environment>
 
     private var store: Set<AnyCancellable> = []
-    private var eventQueue = DispatchQueue(label: "eventQueue", qos: .userInteractive)
+    private let eventDispatchQueue = DispatchQueue(label: "eventQueue", qos: .userInteractive)
+    private var eventQueue: [Event] = []
+    private var isProcessing = false
 
     public init(
         state: State,
@@ -30,31 +33,40 @@ public final class Store<State, Event, Command, Environment> {
     }
 
     public func dispatch(event: Event) {
-        let next = reducer.dispatch(state: state, event: event)
-        dispatch(next)
+        if isProcessing {
+            eventQueue.append(event)
+        } else {
+            isProcessing = true
+            eventDispatchQueue.async { [weak self] in
+                guard let self = self else { return }
+                let next = self.reducer.dispatch(state: self.state, event: event)
+                self.dispatch(next)
+                self.isProcessing = false
+                if let event = self.eventQueue.first {
+                    self.eventQueue.remove(at: 0)
+                    self.dispatch(event: event)
+                }
+            }
+        }
     }
 
 
     // MARK: Private
 
     private func dispatch(_ next: Next<State, Command>) {
-        eventQueue.async { [weak self] in
-            guard let self = self else { return }
+        switch next {
+        case .empty:
+            break
 
-            switch next {
-            case .empty:
-                break
+        case let .next(state):
+            dispatchNext(state: state)
 
-            case let .next(state):
-                self.dispatchNext(state: state)
+        case let .dispatch(commands):
+            dispatchCommands(state: self.state, commands: commands)
 
-            case let .dispatch(commands):
-                self.dispatchCommands(commands: commands)
-
-            case let .nextAndDispatch(state, commands):
-                self.dispatchNext(state: state)
-                self.dispatchCommands(commands: commands)
-            }
+        case let .nextAndDispatch(state, commands):
+            dispatchNext(state: state)
+            dispatchCommands(state: state, commands: commands)
         }
     }
 
@@ -71,7 +83,7 @@ public final class Store<State, Event, Command, Environment> {
         }
     }
 
-    private func dispatchCommands(commands: [Command]) {
+    private func dispatchCommands(state: State, commands: [Command]) {
         commands.forEach { command in
             commandHandler.dispatch(
                 command: command,
@@ -80,11 +92,7 @@ public final class Store<State, Event, Command, Environment> {
             .sink(
                 receiveValue: { [weak self] event in
                     guard let self = self else { return }
-                    let next = self.reducer.dispatch(state: self.state, event: event)
-                    self.eventQueue.async { [weak self] in
-                        guard let self = self else { return }
-                        self.dispatch(next)
-                    }
+                    self.dispatch(event: event)
                 }
             )
             .store(in: &store)
