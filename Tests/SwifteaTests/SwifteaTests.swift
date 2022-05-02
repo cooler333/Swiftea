@@ -5,7 +5,6 @@ import XCTest
 @testable import Swiftea
 
 final class SwifteaTests: XCTestCase {
-
     var cancellableStore: Set<AnyCancellable> = []
 
     override func tearDown() {
@@ -14,6 +13,7 @@ final class SwifteaTests: XCTestCase {
         cancellableStore.forEach { $0.cancel() }
     }
 
+    // swiftlint:disable:next function_body_length
     func testStore() throws {
         struct Model: CustomStringConvertible {
             let index: Int
@@ -44,9 +44,7 @@ final class SwifteaTests: XCTestCase {
             case finish
         }
 
-        struct Environment {
-
-        }
+        struct Environment {}
 
         let reducerReduce: (State, Event) -> Next<State, Command> = { state, event in
             print("State: \(state)")
@@ -87,7 +85,7 @@ final class SwifteaTests: XCTestCase {
             }
         }
 
-        let commandHandlerReduce: (State, Command, Environment) -> AnyPublisher<Event, Never> = { state, command, env in
+        let commandHandlerReduce: (State, Command, Environment) -> AnyPublisher<Event, Never> = { _, command, _ in
             switch command {
             case .loadInitialData:
                 let models = [
@@ -95,7 +93,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 1),
                     Model(index: 2),
                     Model(index: 3),
-                    Model(index: 4)
+                    Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
@@ -110,7 +108,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 6),
                     Model(index: 7),
                     Model(index: 8),
-                    Model(index: 9)
+                    Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
@@ -137,7 +135,7 @@ final class SwifteaTests: XCTestCase {
 
         let responsesExpectation = expectation(description: "wait for all responses")
 
-        var _state: State!
+        var lastState: State!
         store.statePublisher.sink { state in
             if state.page == 0, !state.isLoading {
                 store.dispatch(event: .loadNextPage)
@@ -148,7 +146,7 @@ final class SwifteaTests: XCTestCase {
             }
 
             if state.isFinished {
-                _state = state
+                lastState = state
                 responsesExpectation.fulfill()
             }
         }
@@ -158,8 +156,8 @@ final class SwifteaTests: XCTestCase {
 
         wait(for: [responsesExpectation], timeout: 10)
 
-        XCTAssertEqual(_state.page, 1)
-        XCTAssertEqual(_state.models.count, 10)
-        XCTAssertEqual(_state.isLoading, false)
+        XCTAssertEqual(lastState.page, 1)
+        XCTAssertEqual(lastState.models.count, 10)
+        XCTAssertEqual(lastState.isLoading, false)
     }
 }

@@ -1,0 +1,4 @@
+--exclude Pods,DerivedData,Tests
+--indent 4
+--ifdef no-indent
+--disable unusedArguments

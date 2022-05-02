@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "Swiftea",
     platforms: [
-        .iOS(.v13)
+        .iOS(.v13),
     ],
     products: [
         .library(

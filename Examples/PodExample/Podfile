@@ -3,6 +3,9 @@ use_frameworks!
 platform :ios, '13.0'
 
 target 'Swiftea_Example' do
+  pod 'SwiftLint'
+  pod 'SwiftFormat/CLI'
+
   pod 'Swiftea', :path => '../../', testspecs: ["Tests"]
 
   target 'Swiftea_Tests' do

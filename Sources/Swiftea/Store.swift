@@ -8,7 +8,6 @@
 import Combine
 import Foundation
 
-
 public final class Store<State, Event, Command, Environment> {
     public let statePublisher = PassthroughSubject<State, Never>()
 
@@ -61,7 +60,7 @@ public final class Store<State, Event, Command, Environment> {
             dispatchNext(state: state)
 
         case let .dispatch(commands):
-            dispatchCommands(state: self.state, commands: commands)
+            dispatchCommands(state: state, commands: commands)
 
         case let .nextAndDispatch(state, commands):
             dispatchNext(state: state)
