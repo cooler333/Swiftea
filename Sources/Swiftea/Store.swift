@@ -33,23 +33,22 @@ public final class Store<State, Event, Command, Environment> {
     }
 
     public func dispatch(event: Event) {
-        if isProcessing {
-            eventQueue.append(event)
-        } else {
-            isProcessing = true
-            eventDispatchQueue.async { [weak self] in
-                guard let self = self else { return }
+        eventDispatchQueue.async { [weak self] in
+            guard let self = self else { return }
+            if self.isProcessing {
+                self.eventQueue.append(event)
+            } else {
+                self.isProcessing = true
                 let next = self.reducer.dispatch(state: self.state, event: event)
                 self.dispatch(next)
                 self.isProcessing = false
                 if let event = self.eventQueue.first {
-                    self.eventQueue.remove(at: 0)
+                    self.eventQueue.removeFirst()
                     self.dispatch(event: event)
                 }
             }
         }
     }
-
 
     // MARK: Private
 
