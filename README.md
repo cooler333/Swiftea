@@ -42,6 +42,14 @@ Also you can integrate framework as SPM package
 
 ### We're open to merge requests
 
+## Alternatives
+- [Mobius.swift](https://github.com/spotify/Mobius.swift)
+- [ReSwift](https://github.com/ReSwift/ReSwift)
+- [ReCombine](https://github.com/ReCombine/ReCombine)
+- [Swift Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture)
+- [Tea In Swift](https://github.com/chriseidhof/tea-in-swift)
+- [More](https://github.com/onmyway133/awesome-ios-architecture#unidirectional-data-flow)
+
 ## Author
 
 Dmitrii Coolerov, coolerov333@gmail.com
