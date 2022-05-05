@@ -8,6 +8,7 @@ if you were looking for something like:
 - Flux-like
 - UDF (Unidirectional Data Flow)
 - e.t.c
+
 then you have found it!
 
 Swiftea is implementation of TEA/MVU architecture pattern via Swift  
