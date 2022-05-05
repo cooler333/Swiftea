@@ -9,9 +9,9 @@ if you were looking for something like:
 - UDF (Unidirectional Data Flow)
 - e.t.c
 
-then you have found it!
+but on Swift... Then you have found it!
 
-Swiftea is implementation of TEA/MVU architecture pattern via Swift  
+Swiftea is implementation of TEA/MVU architecture pattern using Swift.
 
 ## Examples
 
@@ -23,10 +23,10 @@ Swiftea is implementation of TEA/MVU architecture pattern via Swift
 
 ## Requirements
 
-- iOS 13.0
-- Swift 5.5
+- iOS: 13.0
+- Swift: 5.5
 
-## Installation
+## Installation (Cocoapods / SPM)
 
 Swiftea is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
