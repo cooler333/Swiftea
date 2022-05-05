@@ -1,0 +1,19 @@
+platform :ios, '13.0'
+
+target 'InfiniteScroll' do
+  use_frameworks!
+
+  pod 'Swiftea', :path => '../../', testspecs: ["Tests"]
+  pod 'Swinject'
+  pod 'SwiftMessages'
+
+  target 'InfiniteScrollTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'InfiniteScrollUITests' do
+    # Pods for testing
+  end
+
+end

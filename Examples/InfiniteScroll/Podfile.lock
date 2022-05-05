@@ -1,0 +1,31 @@
+PODS:
+  - Swiftea (0.1.4)
+  - Swiftea/Tests (0.1.4)
+  - SwiftMessages (9.0.6):
+    - SwiftMessages/App (= 9.0.6)
+  - SwiftMessages/App (9.0.6)
+  - Swinject (2.8.1)
+
+DEPENDENCIES:
+  - Swiftea (from `../../`)
+  - Swiftea/Tests (from `../../`)
+  - SwiftMessages
+  - Swinject
+
+SPEC REPOS:
+  trunk:
+    - SwiftMessages
+    - Swinject
+
+EXTERNAL SOURCES:
+  Swiftea:
+    :path: "../../"
+
+SPEC CHECKSUMS:
+  Swiftea: 03171e38de2fc00ec07e9a71c6d00ad02aace458
+  SwiftMessages: f0c7ef4705a570ad6c5e208b611f4333e660ed92
+  Swinject: 97112918bd7e0785dc2df7036213f3c8cbba6586
+
+PODFILE CHECKSUM: 61da38e66dd1c3c81e3f5dcab05b780750d70f18
+
+COCOAPODS: 1.11.3
