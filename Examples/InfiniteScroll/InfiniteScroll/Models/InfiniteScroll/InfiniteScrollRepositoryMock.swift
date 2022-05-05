@@ -29,7 +29,7 @@ extension InfiniteScrollRepositoryMock: InfiniteScrollRepositoryProtocol {
                 }.eraseToAnyPublisher()
             }
         } else {
-            let nextPageRandom = Int.random(in: 0...6)
+            let nextPageRandom = Int.random(in: 0...2)
             let nextPageError = nextPageRandom == 0
 
             if nextPageError {

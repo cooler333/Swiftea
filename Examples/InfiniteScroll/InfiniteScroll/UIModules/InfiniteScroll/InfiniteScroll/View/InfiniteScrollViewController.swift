@@ -336,7 +336,7 @@ final class InfiniteScrollViewController: UIViewController {
         snapshot.appendSections([0])
 
         let display = displayData.map { displayData -> TitleItem in
-            let title = "\(displayData.details)\n\(displayData.id)"
+            let title = "\(displayData.title)\n\(displayData.id)"
             return TitleItem(title: title)
         }
         snapshot.appendItems(display)

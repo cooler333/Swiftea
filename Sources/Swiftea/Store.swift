@@ -83,17 +83,19 @@ public final class Store<State, Event, Command, Environment> {
 
     private func dispatchCommands(state: State, commands: [Command]) {
         commands.forEach { command in
-            commandHandler.dispatch(
+            let eventStream = commandHandler.dispatch(
                 command: command,
                 state: state
             )
-            .sink(
-                receiveValue: { [weak self] event in
-                    guard let self = self else { return }
-                    self.dispatch(event: event)
-                }
-            )
-            .store(in: &store)
+
+            if let eventStream = eventStream {
+                eventStream.sink(receiveValue: { [weak self] event in
+                        guard let self = self else { return }
+                        self.dispatch(event: event)
+                    }
+                )
+                .store(in: &store)
+            }
         }
     }
 }

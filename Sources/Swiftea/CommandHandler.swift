@@ -9,11 +9,11 @@ import Combine
 import Foundation
 
 public struct CommandHandler<State, Command, Event, Environment> {
-    private let reduce: (State, Command, Environment) -> AnyPublisher<Event, Never>
+    private let reduce: (State, Command, Environment) -> AnyPublisher<Event, Never>?
     private let environment: Environment
 
     public init(
-        reduce: @escaping (State, Command, Environment) -> AnyPublisher<Event, Never>,
+        reduce: @escaping (State, Command, Environment) -> AnyPublisher<Event, Never>?,
         environment: Environment
     ) {
         self.reduce = reduce
@@ -23,7 +23,7 @@ public struct CommandHandler<State, Command, Event, Environment> {
     func dispatch(
         command: Command,
         state: State
-    ) -> AnyPublisher<Event, Never> {
+    ) -> AnyPublisher<Event, Never>? {
         return reduce(state, command, environment)
     }
 }
