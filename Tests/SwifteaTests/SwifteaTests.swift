@@ -197,8 +197,6 @@ final class SwifteaTests: XCTestCase {
         struct Environment {}
 
         let reducerReduce: (State, Event) -> Next<State, Command> = { state, event in
-            print("==== Event: \(event)")
-
             switch event {
             case .loadInitial:
                 var state = state
@@ -273,7 +271,6 @@ final class SwifteaTests: XCTestCase {
                         return true
                     }
                 }
-                .print()
                 .eraseToAnyPublisher()
 
             case .cancelPreviousLoadNextData:
