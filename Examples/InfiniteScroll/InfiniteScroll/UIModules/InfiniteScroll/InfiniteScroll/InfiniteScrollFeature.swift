@@ -43,7 +43,7 @@ enum InfiniteScrollEvent: Equatable {
 enum InfiniteScrollCommand: Equatable {
     case loadInitialPageData
     case loadNextPageData
-    case playbackStream(streamURL: String, broadcastID: String)
+    case openDetails(id: String)
 }
 
 struct InfiniteScrollAPIError: Error, Equatable {}
@@ -122,9 +122,8 @@ enum InfiniteScrollFeature {
             case let .selectInfiniteScrollAtIndex(index):
                 let item = state.data[index]
                 return .dispatch([
-                    .playbackStream(
-                        streamURL: item.title,
-                        broadcastID: item.subtitle
+                    .openDetails(
+                        id: item.id
                     ),
                 ])
 
@@ -175,12 +174,11 @@ enum InfiniteScrollFeature {
                     }
                     .eraseToAnyPublisher()
 
-                case let .playbackStream(streamURL, broadcastID):
+                case let .openDetails(id):
                     return Future<InfiniteScrollEvent, Never> { promise in
                         DispatchQueue.main.async {
-                            environment.moduleOutput?.infiniteScrollModuleWantsToPlaybackStream(
-                                with: streamURL,
-                                broadcastID: broadcastID
+                            environment.moduleOutput?.infiniteScrollModuleWantsToOpenDetails(
+                                with: id
                             )
                             promise(.success(.playbackScreenDidOpen))
                         }

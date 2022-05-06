@@ -8,5 +8,5 @@
 import Foundation
 
 protocol InfiniteScrollModuleOutput: AnyObject {
-    func infiniteScrollModuleWantsToPlaybackStream(with streamURL: String, broadcastID: String)
+    func infiniteScrollModuleWantsToOpenDetails(with id: String)
 }

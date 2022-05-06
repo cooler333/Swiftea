@@ -67,11 +67,11 @@ final class InfiniteScrollFlowCoordinator: FlowCoordinatorProtocol {
 }
 
 extension InfiniteScrollFlowCoordinator: InfiniteScrollModuleOutput {
-    func infiniteScrollModuleWantsToPlaybackStream(with streamURL: String, broadcastID: String) {
+    func infiniteScrollModuleWantsToOpenDetails(with id: String) {
         resolver.resolve(ToastNotificationManagerProtocol.self)!.showNotification(
             with: .info(
-                title: streamURL,
-                message: broadcastID
+                title: "Details did open",
+                message: id
             )
         )
     }
