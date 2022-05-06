@@ -18,7 +18,6 @@ struct InfiniteScrollState: Equatable {
     }
 
     var currentPage = 0
-    let pageLentgth = 15
 
     var isListEnded = false
     var loadingState: LoadingState = .idle
@@ -28,8 +27,8 @@ struct InfiniteScrollState: Equatable {
 
 enum InfiniteScrollEvent: Equatable {
     case loadInitialData
-    case updateInitialData(data: [InfiniteScrollModel])
-    case updateNextData(data: [InfiniteScrollModel])
+    case updateInitialData(data: [InfiniteScrollModel], isListEnded: Bool)
+    case updateNextData(data: [InfiniteScrollModel], isListEnded: Bool)
     case updateDataWithError(error: InfiniteScrollAPIError)
 
     case forceRefreshData
@@ -42,13 +41,14 @@ enum InfiniteScrollEvent: Equatable {
 
 enum InfiniteScrollCommand: Equatable {
     case loadInitialPageData
-    case loadNextPageData
+    case loadNextPageData(page: Int)
     case openDetails(id: String)
 }
 
 struct InfiniteScrollAPIError: Error, Equatable {}
 
 struct InfiniteScrollEnvironment {
+    let pageLentgth = 15
     let mainQueue: DispatchQueue = .main
     let backgroundQueue: DispatchQueue = .global(qos: .background)
     let infiniteScrollRepository: InfiniteScrollRepositoryProtocol
@@ -66,19 +66,19 @@ enum InfiniteScrollFeature {
 
                 return .nextAndDispatch(state, [.loadInitialPageData])
 
-            case let .updateInitialData(data):
+            case let .updateInitialData(data, isListEnded):
                 var state = state
                 state.loadingState = .idle
-                state.isListEnded = data.count < state.pageLentgth
+                state.isListEnded = isListEnded
                 state.currentPage = 0
                 state.data = data
 
                 return .next(state)
 
-            case let .updateNextData(data):
+            case let .updateNextData(data, isListEnded):
                 var state = state
                 state.loadingState = .idle
-                state.isListEnded = data.count < state.pageLentgth
+                state.isListEnded = isListEnded
                 state.currentPage += 1
                 state.data += data
 
@@ -94,7 +94,7 @@ enum InfiniteScrollFeature {
                 var state = state
                 state.loadingState = .nextPage
 
-                return .nextAndDispatch(state, [.loadNextPageData])
+                return .nextAndDispatch(state, [.loadNextPageData(page: state.currentPage + 1)])
 
             case .forceRefreshData:
                 if state.loadingState == .refresh {
@@ -117,7 +117,7 @@ enum InfiniteScrollFeature {
                 var state = state
                 state.loadingState = .nextPage
 
-                return .nextAndDispatch(state, [.loadNextPageData])
+                return .nextAndDispatch(state, [.loadNextPageData(page: state.currentPage + 1)])
 
             case let .selectInfiniteScrollAtIndex(index):
                 let item = state.data[index]
@@ -136,18 +136,18 @@ enum InfiniteScrollFeature {
 
     static func getCommandHandler(
         environment: InfiniteScrollEnvironment
-    ) -> CommandHandler<InfiniteScrollState, InfiniteScrollCommand, InfiniteScrollEvent, InfiniteScrollEnvironment> {
-        let commandHanlder = CommandHandler<InfiniteScrollState, InfiniteScrollCommand, InfiniteScrollEvent, InfiniteScrollEnvironment>(
-            reduce: { state, command, environment in
+    ) -> CommandHandler<InfiniteScrollCommand, InfiniteScrollEvent, InfiniteScrollEnvironment> {
+        let commandHanlder = CommandHandler<InfiniteScrollCommand, InfiniteScrollEvent, InfiniteScrollEnvironment>(
+            reduce: { command, environment in
                 switch command {
                 case .loadInitialPageData:
                     return environment.infiniteScrollRepository.getInfiniteScrolls(
                         with: 0,
-                        pageLentgth: state.pageLentgth
+                        pageLentgth: environment.pageLentgth
                     )
                     .subscribe(on: environment.backgroundQueue)
                     .map { result -> InfiniteScrollEvent in
-                        .updateInitialData(data: result)
+                        .updateInitialData(data: result, isListEnded: result.count < environment.pageLentgth)
                     }
                     .mapError { _ in
                         InfiniteScrollAPIError()
@@ -157,14 +157,14 @@ enum InfiniteScrollFeature {
                     }
                     .eraseToAnyPublisher()
 
-                case .loadNextPageData:
+                case let .loadNextPageData(page):
                     return environment.infiniteScrollRepository.getInfiniteScrolls(
-                        with: state.currentPage + 1,
-                        pageLentgth: state.pageLentgth
+                        with: page,
+                        pageLentgth: environment.pageLentgth
                     )
                     .subscribe(on: environment.backgroundQueue)
                     .map { result -> InfiniteScrollEvent in
-                        .updateNextData(data: result)
+                        .updateNextData(data: result, isListEnded: result.count < environment.pageLentgth)
                     }
                     .mapError { _ in
                         InfiniteScrollAPIError()

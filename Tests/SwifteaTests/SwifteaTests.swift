@@ -82,7 +82,7 @@ final class SwifteaTests: XCTestCase {
             }
         }
 
-        let commandHandlerReduce: (State, Command, Environment) -> AnyPublisher<Event, Never> = { _, command, _ in
+        let commandHandlerReduce: (Command, Environment) -> AnyPublisher<Event, Never> = { command, _ in
             switch command {
             case .loadInitialData:
                 let models = [
@@ -155,7 +155,7 @@ final class SwifteaTests: XCTestCase {
 
         store.dispatch(event: .loadInitial)
 
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -233,7 +233,7 @@ final class SwifteaTests: XCTestCase {
             }
         }
 
-        let commandHandlerReduce: (State, Command, Environment) -> AnyPublisher<Event, Never>? = { state, command, _ in
+        let commandHandlerReduce: (Command, Environment) -> AnyPublisher<Event, Never>? = { command, _ in
             switch command {
             case .loadInitialData:
                 let models = [
@@ -261,14 +261,6 @@ final class SwifteaTests: XCTestCase {
                 return Future<Event, Never> { fullfill in
                     DispatchQueue.main.async {
                         fullfill(.success(.recieveData(models)))
-                    }
-                }
-                .prefix { _ in
-                    let cancellableCommands: [Command] = [.cancelPreviousLoadNextData]
-                    if cancellableCommands.contains(command) {
-                        return false
-                    } else {
-                        return true
                     }
                 }
                 .eraseToAnyPublisher()
