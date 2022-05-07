@@ -8,12 +8,12 @@
 import Combine
 import Foundation
 
-public struct CommandHandler<Command, Event, Environment> {
-    private let reduce: (Command, Environment) -> AnyPublisher<Event, Never>?
+public struct CommandHandler<Command: Equatable, Event, Environment> {
+    private let reduce: (Command, Environment) -> AnyPublisher<Event, Never>
     private let environment: Environment
 
     public init(
-        reduce: @escaping (Command, Environment) -> AnyPublisher<Event, Never>?,
+        reduce: @escaping (Command, Environment) -> AnyPublisher<Event, Never>,
         environment: Environment
     ) {
         self.reduce = reduce
@@ -21,8 +21,15 @@ public struct CommandHandler<Command, Event, Environment> {
     }
 
     func dispatch(
-        command: Command
-    ) -> AnyPublisher<Event, Never>? {
-        return reduce(command, environment)
+        command: Command,
+        cancellableCommands: [Command],
+        commandPublisher: AnyPublisher<Command, Never>
+    ) -> AnyPublisher<Event, Never> {
+        let cancellablePublisher = commandPublisher.filter { command in
+            cancellableCommands.contains { cancellableCommand in
+                command == cancellableCommand
+            }
+        }.eraseToAnyPublisher()
+        return reduce(command, environment).prefix(untilOutputFrom: cancellablePublisher).eraseToAnyPublisher()
     }
 }

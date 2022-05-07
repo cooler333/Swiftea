@@ -8,12 +8,12 @@
 import Combine
 import Foundation
 
-public final class Store<State, Event, Command, Environment> {
+public final class Store<State, Event, Command: Equatable, Environment> {
     public let statePublisher = PassthroughSubject<State, Never>()
 
     private let internalStatePublisher: CurrentValueSubject<State, Never>
     private let internalEventPublisher = PassthroughSubject<Event, Never>()
-    private let internalCommandPublisher = PassthroughSubject<Command, Never>()
+    private let internalCommandPublisher = PassthroughSubject<(Command, [Command]), Never>()
 
     private var store: Set<AnyCancellable> = []
     private let eventDispatchQueue = DispatchQueue(label: "eventQueue", qos: .userInteractive)
@@ -48,22 +48,35 @@ public final class Store<State, Event, Command, Environment> {
 
                 case let .dispatch(commands):
                     commands.forEach { command in
-                        self.internalCommandPublisher.send(command)
+                        self.internalCommandPublisher.send((command, []))
                     }
 
                 case let .nextAndDispatch(state, commands):
                     self.internalStatePublisher.send(state)
                     commands.forEach { command in
-                        self.internalCommandPublisher.send(command)
+                        self.internalCommandPublisher.send((command, []))
+                    }
+
+                case let .dispatchCancellable(commands, cancellablecommands):
+                    commands.forEach { command in
+                        self.internalCommandPublisher.send((command, cancellablecommands))
+                    }
+
+                case let .nextAndDispatchCancellable(state, commands, cancellablecommands):
+                    self.internalStatePublisher.send(state)
+                    commands.forEach { command in
+                        self.internalCommandPublisher.send((command, cancellablecommands))
                     }
                 }
             }
             .store(in: &store)
 
         internalCommandPublisher
-            .compactMap { command -> AnyPublisher<Event, Never>? in
+            .compactMap { (command, cancellablecommands) -> AnyPublisher<Event, Never> in
                 commandHandler.dispatch(
-                    command: command
+                    command: command,
+                    cancellableCommands: cancellablecommands,
+                    commandPublisher: self.internalCommandPublisher.map { $0.0 }.eraseToAnyPublisher()
                 )
             }
             .flatMap { $0 }
