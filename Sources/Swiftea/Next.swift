@@ -12,6 +12,6 @@ public enum Next<State, Command> {
     case next(State)
     case dispatch([Command])
     case nextAndDispatch(State, [Command])
-    case dispatchCancellable(commands: [Command], cancellablecommands: [Command])
-    case nextAndDispatchCancellable(State, commands: [Command], cancellablecommands: [Command])
+    case dispatchCancellable(commands: [Command], cancellableCommands: [Command])
+    case nextAndDispatchCancellable(State, commands: [Command], cancellableCommands: [Command])
 }

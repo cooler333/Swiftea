@@ -163,7 +163,11 @@ final class InfiniteScrollViewController: UIViewController {
 
     @objc private func refresh() {
         viewStore.dispatch(.viewDidPullToRefresh)
-        tableView.refreshControl?.endRefreshing()
+        if let refreshControl = tableView.refreshControl {
+            if refreshControl.isRefreshing {
+                refreshControl.endRefreshing()
+            }
+        }
     }
 
     // swiftlint:disable:next function_body_length

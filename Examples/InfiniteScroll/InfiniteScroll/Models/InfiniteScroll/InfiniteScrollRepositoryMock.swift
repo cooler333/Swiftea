@@ -16,32 +16,28 @@ extension InfiniteScrollRepositoryMock: InfiniteScrollRepositoryProtocol {
             let refreshRandom = Int.random(in: 0...3)
             let refreshError = refreshRandom == 0
 
-            if refreshError {
-                return Fail<[InfiniteScrollModel], Error>(
-                    error: URLError(.notConnectedToInternet)
-                ).eraseToAnyPublisher()
-            } else {
-                return Future<[InfiniteScrollModel], Error> { promise in
-                    DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2) {
+            return Future<[InfiniteScrollModel], Error> { promise in
+                DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 3) {
+                    if refreshError {
+                        promise(.failure(URLError(.notConnectedToInternet)))
+                    } else {
                         promise(.success(self.generateModels(count: pageLentgth)))
                     }
-                }.eraseToAnyPublisher()
-            }
+                }
+            }.eraseToAnyPublisher()
         } else {
             let nextPageRandom = Int.random(in: 0...2)
             let nextPageError = nextPageRandom == 0
 
-            if nextPageError {
-                return Fail<[InfiniteScrollModel], Error>(
-                    error: URLError(.notConnectedToInternet)
-                ).eraseToAnyPublisher()
-            } else {
-                return Future<[InfiniteScrollModel], Error> { promise in
-                    DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2) {
+            return Future<[InfiniteScrollModel], Error> { promise in
+                DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 3) {
+                    if nextPageError {
+                        promise(.failure(URLError(.notConnectedToInternet)))
+                    } else {
                         promise(.success(self.generateModels(count: pageLentgth)))
                     }
-                }.eraseToAnyPublisher()
-            }
+                }
+            }.eraseToAnyPublisher()
         }
     }
 

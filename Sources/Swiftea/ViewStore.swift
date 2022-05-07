@@ -19,7 +19,6 @@ public final class ViewStore<UIState, UIEvent> {
         eventMapper: @escaping (UIEvent) -> Event,
         stateMapper: @escaping (State) -> UIState
     ) {
-        // TODO: Use merge/flatMap instead
         store.statePublisher.map { value in
             stateMapper(value)
         }.sink { [weak self] state in
@@ -27,7 +26,6 @@ public final class ViewStore<UIState, UIEvent> {
             self.statePublisher.send(state)
         }.store(in: &cancellable)
 
-        // TODO: Use merge/flatMap instead
         eventPublisher.map { event in
             eventMapper(event)
         }.sink { event in

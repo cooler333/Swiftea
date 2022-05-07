@@ -33,6 +33,7 @@ enum InfiniteScrollEvent: Equatable {
 
     case forceRefreshData
     case retryToLoadNextPage
+    case receiveCancelAllRequests
 
     case selectInfiniteScrollAtIndex(index: Int)
     case loadNextPage
@@ -42,6 +43,8 @@ enum InfiniteScrollEvent: Equatable {
 enum InfiniteScrollCommand: Equatable {
     case loadInitialPageData
     case loadNextPageData(page: Int)
+    case cancelAllRequests
+
     case openDetails(id: String)
 }
 
@@ -64,7 +67,16 @@ enum InfiniteScrollFeature {
                 var state = state
                 state.loadingState = .refresh
 
-                return .nextAndDispatch(state, [.loadInitialPageData])
+                return .nextAndDispatchCancellable(
+                    state,
+                    commands: [
+                        .cancelAllRequests,
+                        .loadInitialPageData,
+                    ],
+                    cancellableCommands: [
+                        .cancelAllRequests
+                    ]
+                )
 
             case let .updateInitialData(data, isListEnded):
                 var state = state
@@ -94,37 +106,59 @@ enum InfiniteScrollFeature {
                 var state = state
                 state.loadingState = .nextPage
 
-                return .nextAndDispatch(state, [.loadNextPageData(page: state.currentPage + 1)])
+                return .nextAndDispatchCancellable(
+                    state,
+                    commands: [
+                        .cancelAllRequests,
+                        .loadNextPageData(page: state.currentPage + 1),
+                    ],
+                    cancellableCommands: [
+                        .cancelAllRequests
+                    ]
+                )
 
             case .forceRefreshData:
-                if state.loadingState == .refresh {
-                    return .empty
-                }
-
                 var state = state
                 state.loadingState = .refresh
 
-                return .nextAndDispatch(state, [.loadInitialPageData])
+                return .nextAndDispatchCancellable(
+                    state, commands: [
+                        .cancelAllRequests,
+                        .loadInitialPageData,
+                    ],
+                    cancellableCommands: [
+                        .cancelAllRequests
+                    ]
+                )
 
             case .loadNextPage:
                 if state.isListEnded {
                     return .empty
                 }
-                if state.loadingState == .nextPage {
+                if state.loadingState == .refresh {
                     return .empty
                 }
 
                 var state = state
                 state.loadingState = .nextPage
 
-                return .nextAndDispatch(state, [.loadNextPageData(page: state.currentPage + 1)])
+                return .nextAndDispatchCancellable(
+                    state, commands: [
+                        .cancelAllRequests,
+                        .loadNextPageData(page: state.currentPage + 1),
+                    ],
+                    cancellableCommands: [
+                        .cancelAllRequests
+                    ]
+                )
+
+            case .receiveCancelAllRequests:
+                return .empty
 
             case let .selectInfiniteScrollAtIndex(index):
                 let item = state.data[index]
                 return .dispatch([
-                    .openDetails(
-                        id: item.id
-                    ),
+                    .openDetails(id: item.id),
                 ])
 
             case .playbackScreenDidOpen:
@@ -173,6 +207,10 @@ enum InfiniteScrollFeature {
                         Just<InfiniteScrollEvent>(.updateDataWithError(error: error))
                     }
                     .eraseToAnyPublisher()
+
+                case .cancelAllRequests:
+                    return Just<InfiniteScrollEvent>(.receiveCancelAllRequests)
+                        .eraseToAnyPublisher()
 
                 case let .openDetails(id):
                     return Future<InfiniteScrollEvent, Never> { promise in

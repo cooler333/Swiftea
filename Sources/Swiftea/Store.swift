@@ -57,25 +57,25 @@ public final class Store<State, Event, Command: Equatable, Environment> {
                         self.internalCommandPublisher.send((command, []))
                     }
 
-                case let .dispatchCancellable(commands, cancellablecommands):
+                case let .dispatchCancellable(commands, cancellableCommands):
                     commands.forEach { command in
-                        self.internalCommandPublisher.send((command, cancellablecommands))
+                        self.internalCommandPublisher.send((command, cancellableCommands))
                     }
 
-                case let .nextAndDispatchCancellable(state, commands, cancellablecommands):
+                case let .nextAndDispatchCancellable(state, commands, cancellableCommands):
                     self.internalStatePublisher.send(state)
                     commands.forEach { command in
-                        self.internalCommandPublisher.send((command, cancellablecommands))
+                        self.internalCommandPublisher.send((command, cancellableCommands))
                     }
                 }
             }
             .store(in: &store)
 
         internalCommandPublisher
-            .compactMap { (command, cancellablecommands) -> AnyPublisher<Event, Never> in
+            .compactMap { (command, cancellableCommands) -> AnyPublisher<Event, Never> in
                 commandHandler.dispatch(
                     command: command,
-                    cancellableCommands: cancellablecommands,
+                    cancellableCommands: cancellableCommands,
                     commandPublisher: self.internalCommandPublisher.map { $0.0 }.eraseToAnyPublisher()
                 )
             }

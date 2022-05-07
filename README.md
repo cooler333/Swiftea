@@ -37,10 +37,6 @@ pod 'Swiftea'
 
 Also you can integrate framework as SPM package
 
-## TODO
-- More tests
-- Cancellable commands/events
-
 ### We're open to merge requests
 
 ## Alternatives

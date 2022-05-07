@@ -34,9 +34,9 @@ final class SwifteaTests: XCTestCase {
         enum Event {
             case loadInitial
             case loadNextPage
-            case recieveData([Model])
+            case receiveData([Model])
             case finish
-            case recieveFinish
+            case receiveFinish
         }
 
         enum Command {
@@ -62,7 +62,7 @@ final class SwifteaTests: XCTestCase {
                 state.isLoading = true
                 return .nextAndDispatch(state, [.loadNextData])
 
-            case let .recieveData(models):
+            case let .receiveData(models):
                 var state = state
                 state.isLoading = false
                 if state.page == 0 {
@@ -76,7 +76,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return .nextAndDispatch(state, [.finish])
 
-            case .recieveFinish:
+            case .receiveFinish:
                 var state = state
                 state.isFinished = true
                 return .next(state)
@@ -95,7 +95,7 @@ final class SwifteaTests: XCTestCase {
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData(models)))
+                        promise(.success(.receiveData(models)))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -110,7 +110,7 @@ final class SwifteaTests: XCTestCase {
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData(models)))
+                        promise(.success(.receiveData(models)))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -118,7 +118,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveFinish))
+                        promise(.success(.receiveFinish))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -187,9 +187,9 @@ final class SwifteaTests: XCTestCase {
             case loadInitial
             case loadNextPage
             case cancelPreviousRequests
-            case recieveData([Model])
+            case receiveData([Model])
             case finish
-            case recieveFinish
+            case receiveFinish
             case cancelled
         }
 
@@ -215,7 +215,7 @@ final class SwifteaTests: XCTestCase {
                 return .nextAndDispatchCancellable(
                     state,
                     commands: [.loadNextData],
-                    cancellablecommands: [.cancelPreviousLoadNextData]
+                    cancellableCommands: [.cancelPreviousLoadNextData]
                 )
 
             case .cancelPreviousRequests:
@@ -224,7 +224,7 @@ final class SwifteaTests: XCTestCase {
             case .cancelled:
                 return .empty
 
-            case let .recieveData(models):
+            case let .receiveData(models):
                 var state = state
                 state.isLoading = false
                 if state.page == 0 {
@@ -238,7 +238,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return .dispatch([.finish])
 
-            case .recieveFinish:
+            case .receiveFinish:
                 var state = state
                 state.isFinished = true
                 return .next(state)
@@ -257,7 +257,7 @@ final class SwifteaTests: XCTestCase {
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData(models)))
+                        promise(.success(.receiveData(models)))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -272,7 +272,7 @@ final class SwifteaTests: XCTestCase {
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData(models)))
+                        promise(.success(.receiveData(models)))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -284,7 +284,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveFinish))
+                        promise(.success(.receiveFinish))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -352,10 +352,10 @@ final class SwifteaTests: XCTestCase {
         enum Event {
             case loadInitial
             case loadNextPage
-            case recieveData([Model])
+            case receiveData([Model])
             case finish
-            case recieveFinish
-            case cancelled
+            case receiveFinish
+            case receiveCancelPreviousLoadNextData
         }
 
         enum Command {
@@ -380,10 +380,10 @@ final class SwifteaTests: XCTestCase {
                 return .nextAndDispatchCancellable(
                     state,
                     commands: [.cancelPreviousLoadNextData, .loadNextData],
-                    cancellablecommands: [.cancelPreviousLoadNextData]
+                    cancellableCommands: [.cancelPreviousLoadNextData]
                 )
 
-            case let .recieveData(models):
+            case let .receiveData(models):
                 var state = state
                 state.isLoading = false
                 if state.page == 0 {
@@ -397,10 +397,10 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return .dispatch([.finish])
 
-            case .cancelled:
+            case .receiveCancelPreviousLoadNextData:
                 return .empty
 
-            case .recieveFinish:
+            case .receiveFinish:
                 var state = state
                 state.isFinished = true
                 return .next(state)
@@ -419,7 +419,7 @@ final class SwifteaTests: XCTestCase {
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData(models)))
+                        promise(.success(.receiveData(models)))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -434,19 +434,19 @@ final class SwifteaTests: XCTestCase {
                 ]
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData(models)))
+                        promise(.success(.receiveData(models)))
                     }
                 }
                 .eraseToAnyPublisher()
 
             case .cancelPreviousLoadNextData:
-                return Just<Event>(.cancelled)
+                return Just<Event>(.receiveCancelPreviousLoadNextData)
                     .eraseToAnyPublisher()
 
             case .finish:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveFinish))
+                        promise(.success(.receiveFinish))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -506,9 +506,9 @@ final class SwifteaTests: XCTestCase {
             case loadInitial
             case loadNextPage
             case cancelPreviousRequests
-            case recieveData
+            case receiveData
             case finish
-            case recieveFinish
+            case receiveFinish
             case cancelled
         }
 
@@ -538,7 +538,7 @@ final class SwifteaTests: XCTestCase {
                 return .nextAndDispatchCancellable(
                     state,
                     commands: [.loadNextData],
-                    cancellablecommands: [.cancelPreviousLoadNextData]
+                    cancellableCommands: [.cancelPreviousLoadNextData]
                 )
 
             case .cancelPreviousRequests:
@@ -547,7 +547,7 @@ final class SwifteaTests: XCTestCase {
             case .cancelled:
                 return .empty
 
-            case .recieveData:
+            case .receiveData:
                 var state = state
                 state.isLoading = false
                 state.page += 1
@@ -556,7 +556,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return .dispatch([.finish])
 
-            case .recieveFinish:
+            case .receiveFinish:
                 var state = state
                 state.isFinished = true
                 return .next(state)
@@ -568,7 +568,7 @@ final class SwifteaTests: XCTestCase {
             case .loadInitialData:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData))
+                        promise(.success(.receiveData))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -576,7 +576,7 @@ final class SwifteaTests: XCTestCase {
             case .loadNextData:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData))
+                        promise(.success(.receiveData))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -588,7 +588,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveFinish))
+                        promise(.success(.receiveFinish))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -631,7 +631,7 @@ final class SwifteaTests: XCTestCase {
 
         let referenceEventsOrder: [Event] = [
             .loadInitial,
-            .recieveData,
+            .receiveData,
             .loadNextPage,
             .loadNextPage,
             .loadNextPage,
@@ -639,8 +639,8 @@ final class SwifteaTests: XCTestCase {
             .cancelled,
             .loadNextPage,
             .finish,
-            .recieveData,
-            .recieveFinish,
+            .receiveData,
+            .receiveFinish,
         ]
 
         XCTAssertEqual(events, referenceEventsOrder)
@@ -659,9 +659,9 @@ final class SwifteaTests: XCTestCase {
             case loadInitial
             case loadNextPage
             case cancelPreviousRequests
-            case recieveData
+            case receiveData
             case finish
-            case recieveFinish
+            case receiveFinish
             case cancelled
         }
 
@@ -687,7 +687,7 @@ final class SwifteaTests: XCTestCase {
                 return .nextAndDispatchCancellable(
                     state,
                     commands: [.loadNextData],
-                    cancellablecommands: [.cancelPreviousLoadNextData]
+                    cancellableCommands: [.cancelPreviousLoadNextData]
                 )
 
             case .cancelPreviousRequests:
@@ -696,7 +696,7 @@ final class SwifteaTests: XCTestCase {
             case .cancelled:
                 return .empty
 
-            case .recieveData:
+            case .receiveData:
                 var state = state
                 state.isLoading = false
                 state.page += 1
@@ -705,7 +705,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return .dispatch([.finish])
 
-            case .recieveFinish:
+            case .receiveFinish:
                 var state = state
                 state.isFinished = true
                 return .next(state)
@@ -721,7 +721,7 @@ final class SwifteaTests: XCTestCase {
             case .loadInitialData:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData))
+                        promise(.success(.receiveData))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -729,7 +729,7 @@ final class SwifteaTests: XCTestCase {
             case .loadNextData:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveData))
+                        promise(.success(.receiveData))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -741,7 +741,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return Future<Event, Never> { promise in
                     DispatchQueue.main.async {
-                        promise(.success(.recieveFinish))
+                        promise(.success(.receiveFinish))
                     }
                 }
                 .eraseToAnyPublisher()
