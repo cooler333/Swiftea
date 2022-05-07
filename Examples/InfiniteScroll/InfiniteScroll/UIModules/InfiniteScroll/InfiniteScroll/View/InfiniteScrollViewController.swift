@@ -40,6 +40,7 @@ struct InfiniteScrollViewModel: Equatable {
     let details: String
 }
 
+// swiftlint:disable:next type_body_length
 final class InfiniteScrollViewController: UIViewController {
     struct InfiniteScrollDisplayData: Hashable {
         public let title: String
@@ -244,6 +245,7 @@ final class InfiniteScrollViewController: UIViewController {
         return displayData
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func update(state: InfiniteScrollViewState) {
         switch state.contentState {
         case let .content(data, isListEnded):
@@ -364,9 +366,7 @@ final class InfiniteScrollViewController: UIViewController {
             snapshot.appendItems([LoadingErrorContentItem(title: "Tap to load more")])
         }
 
-        dataSource.apply(snapshot, animatingDifferences: false) {
-            // unused
-        }
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
 }
 
@@ -406,4 +406,5 @@ extension InfiniteScrollViewController: UITableViewDelegate {
             fatalError("Unexpected state")
         }
     }
+    // swiftlint:disable:next file_length
 }

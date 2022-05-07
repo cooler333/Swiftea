@@ -5,8 +5,8 @@
 //  Created by Dmitrii Coolerov on 05.05.2022.
 //
 
-import Swinject
 import Foundation
+import Swinject
 
 final class RootContainer {
     private let assembler: Assembler
@@ -35,7 +35,7 @@ public final class RootAssembly: Assembly {
             InfiniteScrollModelParser()
         }
 
-        container.register(InfiniteScrollRepositoryProtocol.self) { resolver in
+        container.register(InfiniteScrollRepositoryProtocol.self) { _ in
             InfiniteScrollRepositoryMock()
 
             // if you want to use real api
@@ -49,7 +49,7 @@ public final class RootAssembly: Assembly {
     }
 
     private func assembleStatefull(container: Container) {
-        container.register(NetworkServiceProtocol.self) { resolver in
+        container.register(NetworkServiceProtocol.self) { _ in
             NetworkService()
         }
         .inObjectScope(.weak)

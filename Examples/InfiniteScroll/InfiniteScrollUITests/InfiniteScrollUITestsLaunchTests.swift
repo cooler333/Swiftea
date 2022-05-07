@@ -8,7 +8,6 @@
 import XCTest
 
 class InfiniteScrollUITestsLaunchTests: XCTestCase {
-
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }

@@ -4,9 +4,9 @@ disabled_rules:
 vertical_whitespace:
   max_empty_lines: 2
 excluded:
-  - Pods
-  - DerivedData
-  - Tests
+  - "**/Pods"
+  - "**/DerivedData"
+  - "**/Tests"
 type_name:
   max_length:
     warning: 50

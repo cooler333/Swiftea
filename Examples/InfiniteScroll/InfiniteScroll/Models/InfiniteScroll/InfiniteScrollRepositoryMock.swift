@@ -23,7 +23,6 @@ extension InfiniteScrollRepositoryMock: InfiniteScrollRepositoryProtocol {
             } else {
                 return Future<[InfiniteScrollModel], Error> { promise in
                     DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2) {
-
                         promise(.success(self.generateModels(count: pageLentgth)))
                     }
                 }.eraseToAnyPublisher()
@@ -39,7 +38,6 @@ extension InfiniteScrollRepositoryMock: InfiniteScrollRepositoryProtocol {
             } else {
                 return Future<[InfiniteScrollModel], Error> { promise in
                     DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 2) {
-
                         promise(.success(self.generateModels(count: pageLentgth)))
                     }
                 }.eraseToAnyPublisher()
@@ -48,19 +46,19 @@ extension InfiniteScrollRepositoryMock: InfiniteScrollRepositoryProtocol {
     }
 
     private func generateModels(count: Int) -> [InfiniteScrollModel] {
-        func generate() -> InfiniteScrollModel {
-            InfiniteScrollModel(
-                title: "Title " + UUID().uuidString.lowercased(),
-                subtitle: "Subtitle " + UUID().uuidString.lowercased(),
-                id: UUID().uuidString,
-                details: "Lorem ipsum" + UUID().uuidString.lowercased()
-            )
-        }
-
         var data: [InfiniteScrollModel] = []
         (0...count).forEach { _ in
-            data.append(generate())
+            data.append(generateModel())
         }
         return data
+    }
+
+    private func generateModel() -> InfiniteScrollModel {
+        InfiniteScrollModel(
+            title: "Title " + UUID().uuidString.lowercased(),
+            subtitle: "Subtitle " + UUID().uuidString.lowercased(),
+            id: UUID().uuidString,
+            details: "Lorem ipsum" + UUID().uuidString.lowercased()
+        )
     }
 }

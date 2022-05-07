@@ -198,7 +198,7 @@ enum InfiniteScrollFeature {
         let eventMapper: (InfiniteScrollState) -> InfiniteScrollViewState = { state in
             let contentState: LCEPagedState<[InfiniteScrollViewModel], InfiniteScrollViewError> = {
                 let data: [InfiniteScrollViewModel] = state.data.map { model in
-                    return InfiniteScrollViewModel(
+                    InfiniteScrollViewModel(
                         title: model.title,
                         subtitle: model.subtitle,
                         id: model.id,

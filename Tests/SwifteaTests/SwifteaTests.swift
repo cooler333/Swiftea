@@ -162,9 +162,8 @@ final class SwifteaTests: XCTestCase {
         XCTAssertEqual(lastState.isLoading, false)
     }
 
-    // swiftlint:disable:next function_body_length
     // TODO: add opportunity to cancel repeated or outdated commands
-/*
+    // swiftlint:disable:next function_body_length
     func testRepeatedCommands() throws {
         struct Model: CustomStringConvertible {
             let index: Int
@@ -317,5 +316,4 @@ final class SwifteaTests: XCTestCase {
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
     }
-*/
 }
