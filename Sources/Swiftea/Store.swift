@@ -72,7 +72,7 @@ public final class Store<State, Event, Command: Equatable, Environment> {
             .store(in: &store)
 
         internalCommandPublisher
-            .compactMap { (command, cancellableCommands) -> AnyPublisher<Event, Never> in
+            .compactMap { command, cancellableCommands -> AnyPublisher<Event, Never> in
                 commandHandler.dispatch(
                     command: command,
                     cancellableCommands: cancellableCommands,

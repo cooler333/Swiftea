@@ -74,7 +74,7 @@ enum InfiniteScrollFeature {
                         .loadInitialPageData,
                     ],
                     cancellableCommands: [
-                        .cancelAllRequests
+                        .cancelAllRequests,
                     ]
                 )
 
@@ -113,7 +113,7 @@ enum InfiniteScrollFeature {
                         .loadNextPageData(page: state.currentPage + 1),
                     ],
                     cancellableCommands: [
-                        .cancelAllRequests
+                        .cancelAllRequests,
                     ]
                 )
 
@@ -127,7 +127,7 @@ enum InfiniteScrollFeature {
                         .loadInitialPageData,
                     ],
                     cancellableCommands: [
-                        .cancelAllRequests
+                        .cancelAllRequests,
                     ]
                 )
 
@@ -148,7 +148,7 @@ enum InfiniteScrollFeature {
                         .loadNextPageData(page: state.currentPage + 1),
                     ],
                     cancellableCommands: [
-                        .cancelAllRequests
+                        .cancelAllRequests,
                     ]
                 )
 
@@ -168,6 +168,7 @@ enum InfiniteScrollFeature {
         return reducer
     }
 
+    // swiftlint:disable:next function_body_length
     static func getCommandHandler(
         environment: InfiniteScrollEnvironment
     ) -> CommandHandler<InfiniteScrollCommand, InfiniteScrollEvent, InfiniteScrollEnvironment> {
