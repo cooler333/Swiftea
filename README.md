@@ -13,6 +13,20 @@ but on Swift... Then you have found it!
 
 Swiftea is implementation of TEA/MVU architecture pattern using Swift.
 
+## Features
+
+- Cancellable side effects (cancel outdated network requests)
+- Do not use 3rd party libraries
+- use Combine
+- 100% business logic code coverage
+
+## Known issues
+
+- Logical race (race condition) cause of Combine + multithread
+- Events, Commands, State mutates on main queue but should be mutated on serial backgroud queue
+
+#### We're open to merge requests
+
 ## Examples
 
 - [Infinite Scroll](https://github.com/cooler333/Swiftea/tree/main/Examples/InfiniteScroll)
@@ -36,8 +50,6 @@ pod 'Swiftea'
 ```
 
 Also you can integrate framework as SPM package
-
-### We're open to merge requests
 
 ## Alternatives
 - [Mobius.swift](https://github.com/spotify/Mobius.swift)

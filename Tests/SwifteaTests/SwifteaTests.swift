@@ -16,7 +16,7 @@ final class SwifteaTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testStoreRaceCondition() throws {
         // Arrange
-        struct Model: CustomStringConvertible {
+        struct Model: Equatable, CustomStringConvertible {
             let index: Int
 
             var description: String {
@@ -24,7 +24,7 @@ final class SwifteaTests: XCTestCase {
             }
         }
 
-        struct State {
+        struct State: Equatable {
             var page = 0
             var models: [Model] = []
             var isLoading = false
@@ -94,7 +94,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -109,7 +109,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -117,7 +117,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -139,8 +139,11 @@ final class SwifteaTests: XCTestCase {
         var lastState: State!
 
         // Act
+        var additionalEventsHandled = false
+
         store.statePublisher.sink { state in
-            if state.page == 1, !state.isLoading {
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
@@ -158,7 +161,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 1)
+        wait(for: [responsesExpectation], timeout: 10)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -168,7 +171,7 @@ final class SwifteaTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testSubscriptionCancellationUsingEvent() throws {
         // Arrange
-        struct Model: CustomStringConvertible {
+        struct Model: Equatable, CustomStringConvertible {
             let index: Int
 
             var description: String {
@@ -176,7 +179,7 @@ final class SwifteaTests: XCTestCase {
             }
         }
 
-        struct State {
+        struct State: Equatable {
             var page = 0
             var models: [Model] = []
             var isLoading = false
@@ -256,7 +259,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -271,7 +274,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -283,7 +286,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -305,8 +308,11 @@ final class SwifteaTests: XCTestCase {
         var lastState: State!
 
         // Act
+        var additionalEventsHandled = false
+
         store.statePublisher.sink { state in
-            if state.page == 1, !state.isLoading {
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
@@ -325,7 +331,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 1)
+        wait(for: [responsesExpectation], timeout: 10)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -334,7 +340,7 @@ final class SwifteaTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testSubscriptionCancellationUsingCommand() throws {
         // Arrange
-        struct Model: CustomStringConvertible {
+        struct Model: Equatable, CustomStringConvertible {
             let index: Int
 
             var description: String {
@@ -342,10 +348,10 @@ final class SwifteaTests: XCTestCase {
             }
         }
 
-        struct State {
+        struct State: Equatable {
             var page = 0
             var models: [Model] = []
-            var isLoading = false
+            var isInitialLoading = false
             var isFinished = false
         }
 
@@ -371,22 +377,19 @@ final class SwifteaTests: XCTestCase {
             switch event {
             case .loadInitial:
                 var state = state
-                state.isLoading = true
+                state.isInitialLoading = true
                 return .nextAndDispatch(state, [.loadInitialData])
 
             case .loadNextPage:
-                var state = state
-                state.isLoading = true
-                return .nextAndDispatchCancellable(
-                    state,
+                return .dispatchCancellable(
                     commands: [.cancelPreviousLoadNextData, .loadNextData],
                     cancellableCommands: [.cancelPreviousLoadNextData]
                 )
 
             case let .receiveData(models):
                 var state = state
-                state.isLoading = false
                 if state.page == 0 {
+                    state.isInitialLoading = false
                     state.models = models
                 } else {
                     state.models += models
@@ -418,7 +421,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -433,7 +436,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -445,7 +448,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -467,27 +470,195 @@ final class SwifteaTests: XCTestCase {
         var lastState: State!
 
         // Act
-        store.statePublisher
-            .sink { state in
-                if state.page == 1, !state.isLoading {
-                    store.dispatch(event: .loadNextPage)
-                    store.dispatch(event: .loadNextPage)
-                    store.dispatch(event: .loadNextPage)
-                    store.dispatch(event: .loadNextPage)
-                    store.dispatch(event: .finish)
-                }
+        var additionalEventsHandled = false
 
-                if state.isFinished {
-                    lastState = state
-                    responsesExpectation.fulfill()
-                }
+        store.statePublisher.sink { state in
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .finish)
             }
-            .store(in: &cancellableStore)
+
+            if state.isFinished {
+                lastState = state
+                responsesExpectation.fulfill()
+            }
+        }
+        .store(in: &cancellableStore)
 
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 1)
+        wait(for: [responsesExpectation], timeout: 10)
+
+        XCTAssertEqual(lastState.page, 2)
+        XCTAssertEqual(lastState.models.count, 10)
+    }
+
+    // swiftlint:disable:next function_body_length
+    func testNextWithUnchangedState() throws {
+        // Arrange
+        struct Model: Equatable, CustomStringConvertible {
+            let index: Int
+
+            var description: String {
+                return "Index: \(index)"
+            }
+        }
+
+        struct State: Equatable {
+            var page = 0
+            var models: [Model] = []
+            var isInitialLoading = false
+            var isFinished = false
+        }
+
+        enum Event {
+            case loadInitial
+            case loadNextPage
+            case receiveData([Model])
+            case finish
+            case receiveFinish
+            case receiveCancelPreviousLoadNextData
+        }
+
+        enum Command {
+            case loadInitialData
+            case cancelPreviousLoadNextData
+            case loadNextData
+            case finish
+        }
+
+        struct Environment {}
+
+        let reducerReduce: (State, Event) -> Next<State, Command> = { state, event in
+            switch event {
+            case .loadInitial:
+                var state = state
+                state.isInitialLoading = true
+                return .nextAndDispatch(state, [.loadInitialData])
+
+            case .loadNextPage:
+                // Pass same state value to .next
+                var state = state
+                let isFinished = state.isFinished
+                state.isFinished = isFinished
+                return .nextAndDispatchCancellable(
+                    state,
+                    commands: [.cancelPreviousLoadNextData, .loadNextData],
+                    cancellableCommands: [.cancelPreviousLoadNextData]
+                )
+
+            case let .receiveData(models):
+                var state = state
+                if state.page == 0 {
+                    state.isInitialLoading = false
+                    state.models = models
+                } else {
+                    state.models += models
+                }
+                state.page += 1
+                return .next(state)
+
+            case .finish:
+                return .dispatch([.finish])
+
+            case .receiveCancelPreviousLoadNextData:
+                return .empty
+
+            case .receiveFinish:
+                var state = state
+                state.isFinished = true
+                return .next(state)
+            }
+        }
+
+        let commandHandlerReduce: (Command, Environment) -> AnyPublisher<Event, Never> = { command, _ in
+            switch command {
+            case .loadInitialData:
+                let models = [
+                    Model(index: 0),
+                    Model(index: 1),
+                    Model(index: 2),
+                    Model(index: 3),
+                    Model(index: 4),
+                ]
+                return Future<Event, Never> { promise in
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveData(models)))
+                    }
+                }
+                .eraseToAnyPublisher()
+
+            case .loadNextData:
+                let models = [
+                    Model(index: 5),
+                    Model(index: 6),
+                    Model(index: 7),
+                    Model(index: 8),
+                    Model(index: 9),
+                ]
+                return Future<Event, Never> { promise in
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveData(models)))
+                    }
+                }
+                .eraseToAnyPublisher()
+
+            case .cancelPreviousLoadNextData:
+                return Just<Event>(.receiveCancelPreviousLoadNextData)
+                    .eraseToAnyPublisher()
+
+            case .finish:
+                return Future<Event, Never> { promise in
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveFinish))
+                    }
+                }
+                .eraseToAnyPublisher()
+            }
+        }
+
+        let store = Store<State, Event, Command, Environment>(
+            state: .init(),
+            reducer: .init(
+                reduce: reducerReduce
+            ), commandHandler: .init(
+                reduce: commandHandlerReduce,
+                environment: .init()
+            )
+        )
+
+        let responsesExpectation = expectation(description: "wait for all responses")
+        var lastState: State!
+
+        // Act
+        var additionalEventsHandled = false
+
+        store.statePublisher.sink { state in
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .finish)
+            }
+
+            if state.isFinished {
+                lastState = state
+                responsesExpectation.fulfill()
+            }
+        }
+        .store(in: &cancellableStore)
+
+        store.dispatch(event: .loadInitial)
+
+        // Assert
+        wait(for: [responsesExpectation], timeout: 10)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -496,7 +667,7 @@ final class SwifteaTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testEventsOrder() throws {
         // Arrange
-        struct State {
+        struct State: Equatable {
             var page = 0
             var isLoading = false
             var isFinished = false
@@ -506,10 +677,10 @@ final class SwifteaTests: XCTestCase {
             case loadInitial
             case loadNextPage
             case cancelPreviousRequests
-            case receiveData
+            case receiveDataFOOBAR
             case finish
-            case receiveFinish
-            case cancelled
+            case receiveFinishFOOBAR
+            case cancelledFOOBAR
         }
 
         enum Command {
@@ -544,10 +715,10 @@ final class SwifteaTests: XCTestCase {
             case .cancelPreviousRequests:
                 return .dispatch([.cancelPreviousLoadNextData])
 
-            case .cancelled:
+            case .cancelledFOOBAR:
                 return .empty
 
-            case .receiveData:
+            case .receiveDataFOOBAR:
                 var state = state
                 state.isLoading = false
                 state.page += 1
@@ -556,7 +727,7 @@ final class SwifteaTests: XCTestCase {
             case .finish:
                 return .dispatch([.finish])
 
-            case .receiveFinish:
+            case .receiveFinishFOOBAR:
                 var state = state
                 state.isFinished = true
                 return .next(state)
@@ -567,28 +738,28 @@ final class SwifteaTests: XCTestCase {
             switch command {
             case .loadInitialData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
-                        promise(.success(.receiveData))
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveDataFOOBAR))
                     }
                 }
                 .eraseToAnyPublisher()
 
             case .loadNextData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
-                        promise(.success(.receiveData))
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveDataFOOBAR))
                     }
                 }
                 .eraseToAnyPublisher()
 
             case .cancelPreviousLoadNextData:
-                return Just<Event>(.cancelled)
+                return Just<Event>(.cancelledFOOBAR)
                     .eraseToAnyPublisher()
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
-                        promise(.success(.receiveFinish))
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveFinishFOOBAR))
                     }
                 }
                 .eraseToAnyPublisher()
@@ -608,8 +779,11 @@ final class SwifteaTests: XCTestCase {
         let responsesExpectation = expectation(description: "wait for all responses")
 
         // Act
+        var additionalEventsHandled = false
+
         store.statePublisher.sink { state in
-            if state.page == 1, !state.isLoading {
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
@@ -627,20 +801,20 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 1)
+        wait(for: [responsesExpectation], timeout: 10)
 
         let referenceEventsOrder: [Event] = [
             .loadInitial,
-            .receiveData,
+            .receiveDataFOOBAR,
             .loadNextPage,
             .loadNextPage,
             .loadNextPage,
             .cancelPreviousRequests,
-            .cancelled,
             .loadNextPage,
             .finish,
-            .receiveData,
-            .receiveFinish,
+            .cancelledFOOBAR,
+            .receiveDataFOOBAR,
+            .receiveFinishFOOBAR,
         ]
 
         XCTAssertEqual(events, referenceEventsOrder)
@@ -649,7 +823,7 @@ final class SwifteaTests: XCTestCase {
     // swiftlint:disable:next function_body_length
     func testCommandsOrder() throws {
         // Arrange
-        struct State {
+        struct State: Equatable {
             var page = 0
             var isLoading = false
             var isFinished = false
@@ -720,7 +894,7 @@ final class SwifteaTests: XCTestCase {
             switch command {
             case .loadInitialData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData))
                     }
                 }
@@ -728,7 +902,7 @@ final class SwifteaTests: XCTestCase {
 
             case .loadNextData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveData))
                     }
                 }
@@ -740,7 +914,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.main.async {
+                    DispatchQueue.global(qos: .background).async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -761,8 +935,11 @@ final class SwifteaTests: XCTestCase {
         let responsesExpectation = expectation(description: "wait for all responses")
 
         // Act
+        var additionalEventsHandled = false
+
         store.statePublisher.sink { state in
-            if state.page == 1, !state.isLoading {
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
                 store.dispatch(event: .loadNextPage)
@@ -780,11 +957,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 1)
-
-        commands.forEach { command in
-            print(command)
-        }
+        wait(for: [responsesExpectation], timeout: 10)
 
         let referenceCommandsOrder: [Command] = [
             .loadInitialData,
@@ -797,5 +970,208 @@ final class SwifteaTests: XCTestCase {
         ]
 
         XCTAssertEqual(commands, referenceCommandsOrder)
+    }
+
+    // swiftlint:disable:next function_body_length
+    func testStateOrder() throws {
+        // Arrange
+        struct Model: Equatable, CustomStringConvertible {
+            let index: Int
+
+            var description: String {
+                return "Index: \(index)"
+            }
+        }
+
+        struct State: Equatable {
+            var page = 0
+            var models: [Model] = []
+            var isLoading = false
+            var isFinished = false
+        }
+
+        enum Event {
+            case loadInitial
+            case loadNextPage
+            case receiveData([Model])
+            case finish
+            case receiveFinish
+        }
+
+        enum Command {
+            case loadInitialData
+            case loadNextData
+            case finish
+        }
+
+        struct Environment {}
+
+        let reducerReduce: (State, Event) -> Next<State, Command> = { state, event in
+            switch event {
+            case .loadInitial:
+                var state = state
+                state.isLoading = true
+                return .nextAndDispatch(state, [.loadInitialData])
+
+            case .loadNextPage:
+                if state.isLoading {
+                    return .empty
+                }
+                var state = state
+                state.isLoading = true
+                return .nextAndDispatch(state, [.loadNextData])
+
+            case let .receiveData(models):
+                var state = state
+                state.isLoading = false
+                if state.page == 0 {
+                    state.models = models
+                } else {
+                    state.models += models
+                }
+                state.page += 1
+                return .next(state)
+
+            case .finish:
+                return .nextAndDispatch(state, [.finish])
+
+            case .receiveFinish:
+                var state = state
+                state.isFinished = true
+                return .next(state)
+            }
+        }
+
+        let commandHandlerReduce: (Command, Environment) -> AnyPublisher<Event, Never> = { command, _ in
+            switch command {
+            case .loadInitialData:
+                let models = [
+                    Model(index: 0),
+                    Model(index: 1),
+                    Model(index: 2),
+                    Model(index: 3),
+                    Model(index: 4),
+                ]
+                return Future<Event, Never> { promise in
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveData(models)))
+                    }
+                }
+                .eraseToAnyPublisher()
+
+            case .loadNextData:
+                let models = [
+                    Model(index: 5),
+                    Model(index: 6),
+                    Model(index: 7),
+                    Model(index: 8),
+                    Model(index: 9),
+                ]
+                return Future<Event, Never> { promise in
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveData(models)))
+                    }
+                }
+                .eraseToAnyPublisher()
+
+            case .finish:
+                return Future<Event, Never> { promise in
+                    DispatchQueue.global(qos: .background).async {
+                        promise(.success(.receiveFinish))
+                    }
+                }
+                .eraseToAnyPublisher()
+            }
+        }
+
+        let store = Store<State, Event, Command, Environment>(
+            state: .init(),
+            reducer: .init(
+                reduce: reducerReduce
+            ), commandHandler: .init(
+                reduce: commandHandlerReduce,
+                environment: .init()
+            )
+        )
+
+        let responsesExpectation = expectation(description: "wait for all responses")
+        var states: [State] = []
+
+        // Act
+        var additionalEventsHandled = false
+
+        store.statePublisher.sink { state in
+            states.append(state)
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .loadNextPage)
+                store.dispatch(event: .finish)
+            }
+
+            if state.isFinished {
+                responsesExpectation.fulfill()
+            }
+        }
+        .store(in: &cancellableStore)
+
+        store.dispatch(event: .loadInitial)
+
+        // Assert
+        wait(for: [responsesExpectation], timeout: 10)
+
+        let referenceStates: [State] = [
+            State(page: 0, models: [], isLoading: false, isFinished: false),
+            State(page: 0, models: [], isLoading: true, isFinished: false),
+            State(page: 1, models: [
+                Model(index: 0),
+                Model(index: 1),
+                Model(index: 2),
+                Model(index: 3),
+                Model(index: 4),
+            ], isLoading: false, isFinished: false),
+            State(page: 1, models: [
+                Model(index: 0),
+                Model(index: 1),
+                Model(index: 2),
+                Model(index: 3),
+                Model(index: 4),
+            ], isLoading: true, isFinished: false),
+            State(page: 1, models: [
+                Model(index: 0),
+                Model(index: 1),
+                Model(index: 2),
+                Model(index: 3),
+                Model(index: 4),
+            ], isLoading: true, isFinished: false),
+            State(page: 2, models: [
+                Model(index: 0),
+                Model(index: 1),
+                Model(index: 2),
+                Model(index: 3),
+                Model(index: 4),
+                Model(index: 5),
+                Model(index: 6),
+                Model(index: 7),
+                Model(index: 8),
+                Model(index: 9),
+            ], isLoading: false, isFinished: false),
+            State(page: 2, models: [
+                Model(index: 0),
+                Model(index: 1),
+                Model(index: 2),
+                Model(index: 3),
+                Model(index: 4),
+                Model(index: 5),
+                Model(index: 6),
+                Model(index: 7),
+                Model(index: 8),
+                Model(index: 9),
+            ], isLoading: false, isFinished: true),
+        ]
+
+        XCTAssertEqual(states, referenceStates)
     }
 }

@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-public final class Store<State, Event, Command: Equatable, Environment> {
+public final class Store<State: Equatable, Event, Command: Equatable, Environment> {
     public let statePublisher = PassthroughSubject<State, Never>()
 
     private let internalStatePublisher: CurrentValueSubject<State, Never>
@@ -16,9 +16,6 @@ public final class Store<State, Event, Command: Equatable, Environment> {
     private let internalCommandPublisher = PassthroughSubject<(Command, [Command]), Never>()
 
     private var store: Set<AnyCancellable> = []
-    private let eventDispatchQueue = DispatchQueue(label: "eventQueue", qos: .userInteractive)
-    private var eventQueue: [Event] = []
-    private var isProcessing = false
 
     public init(
         state: State,
@@ -76,7 +73,9 @@ public final class Store<State, Event, Command: Equatable, Environment> {
                 commandHandler.dispatch(
                     command: command,
                     cancellableCommands: cancellableCommands,
-                    commandPublisher: self.internalCommandPublisher.map { $0.0 }.eraseToAnyPublisher()
+                    unhandledCommandsPublisher: self.internalCommandPublisher
+                        .map { $0.0 }
+                        .eraseToAnyPublisher()
                 )
             }
             .flatMap { $0 }
