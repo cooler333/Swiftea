@@ -20,17 +20,7 @@ public struct CommandHandler<Command: Equatable, Event, Environment> {
         self.environment = environment
     }
 
-    func dispatch(
-        command: Command,
-        cancellableCommands: [Command],
-        unhandledCommandsPublisher: AnyPublisher<Command, Never>
-    ) -> AnyPublisher<Event, Never> {
-        let cancellablePublisher = unhandledCommandsPublisher.filter { unhandledCommand in
-            cancellableCommands.contains(unhandledCommand)
-        }.eraseToAnyPublisher()
+    func dispatch(command: Command) -> AnyPublisher<Event, Never> {
         return reduce(command, environment)
-            .receive(on: DispatchQueue.main)
-            .prefix(untilOutputFrom: cancellablePublisher)
-            .eraseToAnyPublisher()
     }
 }

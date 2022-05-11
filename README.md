@@ -20,11 +20,6 @@ Swiftea is implementation of TEA/MVU architecture pattern using Swift.
 - use Combine
 - 100% business logic code coverage
 
-## Known issues
-
-- Logical race (race condition) cause of Combine + multithread
-- Events, Commands, State mutates on main queue but should be mutated on serial backgroud queue
-
 #### We're open to merge requests
 
 ## Examples

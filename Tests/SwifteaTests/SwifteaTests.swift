@@ -6,6 +6,7 @@ import XCTest
 
 final class SwifteaTests: XCTestCase {
     var cancellableStore: Set<AnyCancellable> = []
+    var backgroundConcurrentQueue = DispatchQueue(label: "backgroundConcurrentQueue")
 
     override func tearDown() {
         super.tearDown()
@@ -94,7 +95,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -109,7 +110,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -117,7 +118,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -259,7 +260,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -274,7 +275,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -286,7 +287,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -421,7 +422,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -436,7 +437,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -448,7 +449,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -587,7 +588,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -602,7 +603,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -614,7 +615,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -738,7 +739,7 @@ final class SwifteaTests: XCTestCase {
             switch command {
             case .loadInitialData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveDataFOOBAR))
                     }
                 }
@@ -746,7 +747,7 @@ final class SwifteaTests: XCTestCase {
 
             case .loadNextData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveDataFOOBAR))
                     }
                 }
@@ -758,7 +759,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveFinishFOOBAR))
                     }
                 }
@@ -894,7 +895,7 @@ final class SwifteaTests: XCTestCase {
             switch command {
             case .loadInitialData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData))
                     }
                 }
@@ -902,7 +903,7 @@ final class SwifteaTests: XCTestCase {
 
             case .loadNextData:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData))
                     }
                 }
@@ -914,7 +915,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -1053,7 +1054,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 4),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -1068,7 +1069,7 @@ final class SwifteaTests: XCTestCase {
                     Model(index: 9),
                 ]
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveData(models)))
                     }
                 }
@@ -1076,7 +1077,7 @@ final class SwifteaTests: XCTestCase {
 
             case .finish:
                 return Future<Event, Never> { promise in
-                    DispatchQueue.global(qos: .background).async {
+                    self.backgroundConcurrentQueue.async {
                         promise(.success(.receiveFinish))
                     }
                 }
@@ -1173,5 +1174,139 @@ final class SwifteaTests: XCTestCase {
         ]
 
         XCTAssertEqual(states, referenceStates)
+    }
+
+    // swiftlint:disable:next function_body_length
+    func testStateData() throws {
+        // Arrange
+        struct State: Equatable {
+            var page = 0
+            var isLoading = false
+            var isFinished = false
+        }
+
+        enum Event {
+            case loadInitial
+            case loadNextPage
+            case receiveData(value: Int)
+            case finish
+            case receiveFinish
+        }
+
+        enum Command: Equatable, Hashable {
+            case loadInitialData(value: Int)
+            case loadNextData(value: Int)
+            case finish
+        }
+
+        struct Environment {}
+
+        let reducerReduce: (State, Event) -> Next<State, Command> = { state, event in
+            switch event {
+            case .loadInitial:
+                var state = state
+                state.isLoading = true
+                return .nextAndDispatch(state, [.loadInitialData(value: state.page)])
+
+            case .loadNextPage:
+                var state = state
+                state.isLoading = true
+                return .nextAndDispatch(
+                    state,
+                    [.loadNextData(value: state.page)]
+                )
+
+            case .receiveData:
+                var state = state
+                state.isLoading = false
+                state.page += 1
+                return .next(state)
+
+            case .finish:
+                return .dispatch([.finish])
+
+            case .receiveFinish:
+                var state = state
+                state.isFinished = true
+                return .next(state)
+            }
+        }
+
+        let commandHandlerReduce: (Command, Environment) -> AnyPublisher<Event, Never> = { command, _ in
+            switch command {
+            case let .loadInitialData(value):
+                return Future<Event, Never> { promise in
+                    self.backgroundConcurrentQueue.async {
+                        promise(.success(.receiveData(value: value)))
+                    }
+                }
+                .eraseToAnyPublisher()
+
+            case let .loadNextData(value):
+                return Future<Event, Never> { promise in
+                    self.backgroundConcurrentQueue.async {
+                        promise(.success(.receiveData(value: value)))
+                    }
+                }
+                .eraseToAnyPublisher()
+
+            case .finish:
+                return Future<Event, Never> { promise in
+                    self.backgroundConcurrentQueue.async {
+                        promise(.success(.receiveFinish))
+                    }
+                }
+                .eraseToAnyPublisher()
+            }
+        }
+
+        let store = Store<State, Event, Command, Environment>(
+            state: .init(),
+            reducer: .init(
+                reduce: reducerReduce
+            ), commandHandler: .init(
+                reduce: commandHandlerReduce,
+                environment: .init()
+            )
+        )
+
+        let responsesExpectation = expectation(description: "wait for all responses")
+        var stateValues: [State] = []
+
+        // Act
+        var additionalEventsHandled = false
+
+        store.statePublisher.sink { state in
+            stateValues.append(state)
+
+            if state.page == 1, !additionalEventsHandled {
+                additionalEventsHandled = true
+                for _ in (0...100) {
+                    store.dispatch(event: .loadNextPage)
+                }
+                store.dispatch(event: .finish)
+            }
+
+            if state.isFinished {
+                responsesExpectation.fulfill()
+            }
+        }
+        .store(in: &cancellableStore)
+
+        store.dispatch(event: .loadInitial)
+
+        // Assert
+        wait(for: [responsesExpectation], timeout: 10)
+
+        let referenceStateValues: [Int] = Array(0...102)
+        XCTAssertEqual( stateValues.map { $0.page }.uniqued(), referenceStateValues)
+    }
+
+}
+
+extension Sequence where Element: Hashable {
+    func uniqued() -> [Element] {
+        var set = Set<Element>()
+        return filter { set.insert($0).inserted }
     }
 }
