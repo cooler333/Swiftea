@@ -58,9 +58,9 @@ struct InfiniteScrollEnvironment {
     weak var moduleOutput: InfiniteScrollModuleOutput?
 }
 
-enum InfiniteScrollFeature {
+struct InfiniteScrollFeature {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    static func getReducer() -> Reducer<InfiniteScrollState, InfiniteScrollEvent, InfiniteScrollCommand> {
+    func getReducer() -> Reducer<InfiniteScrollState, InfiniteScrollEvent, InfiniteScrollCommand> {
         let reducer = Reducer<InfiniteScrollState, InfiniteScrollEvent, InfiniteScrollCommand>(reduce: { state, event in
             switch event {
             case .loadInitialData:
@@ -169,7 +169,7 @@ enum InfiniteScrollFeature {
     }
 
     // swiftlint:disable:next function_body_length
-    static func getCommandHandler(
+    func getCommandHandler(
         environment: InfiniteScrollEnvironment
     ) -> CommandHandler<InfiniteScrollCommand, InfiniteScrollEvent, InfiniteScrollEnvironment> {
         let commandHanlder = CommandHandler<InfiniteScrollCommand, InfiniteScrollEvent, InfiniteScrollEnvironment>(
@@ -233,7 +233,7 @@ enum InfiniteScrollFeature {
         return commandHanlder
     }
 
-    static func getStateMapper() -> (InfiniteScrollState) -> InfiniteScrollViewState {
+    func getStateMapper() -> (InfiniteScrollState) -> InfiniteScrollViewState {
         let eventMapper: (InfiniteScrollState) -> InfiniteScrollViewState = { state in
             let contentState: LCEPagedState<[InfiniteScrollViewModel], InfiniteScrollViewError> = {
                 let data: [InfiniteScrollViewModel] = state.data.map { model in
@@ -265,7 +265,7 @@ enum InfiniteScrollFeature {
         return eventMapper
     }
 
-    static func getEventMapper() -> (InfiniteScrollViewEvent) -> InfiniteScrollEvent {
+    func getEventMapper() -> (InfiniteScrollViewEvent) -> InfiniteScrollEvent {
         let eventMapper: (InfiniteScrollViewEvent) -> InfiniteScrollEvent = { viewEvent in
             switch viewEvent {
             case .viewDidLoad:

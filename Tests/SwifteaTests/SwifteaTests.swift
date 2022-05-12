@@ -162,7 +162,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -332,7 +332,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -493,7 +493,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -659,7 +659,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         XCTAssertEqual(lastState.page, 2)
         XCTAssertEqual(lastState.models.count, 10)
@@ -802,7 +802,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         let referenceEventsOrder: [Event] = [
             .loadInitial,
@@ -958,7 +958,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         let referenceCommandsOrder: [Command] = [
             .loadInitialData,
@@ -1121,7 +1121,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         let referenceStates: [State] = [
             State(page: 0, models: [], isLoading: false, isFinished: false),
@@ -1296,7 +1296,7 @@ final class SwifteaTests: XCTestCase {
         store.dispatch(event: .loadInitial)
 
         // Assert
-        wait(for: [responsesExpectation], timeout: 10)
+        wait(for: [responsesExpectation], timeout: 1)
 
         let referenceStateValues: [Int] = Array(0...102)
         XCTAssertEqual( stateValues.map { $0.page }.uniqued(), referenceStateValues)

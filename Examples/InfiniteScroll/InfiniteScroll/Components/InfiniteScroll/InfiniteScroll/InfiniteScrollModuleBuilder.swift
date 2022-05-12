@@ -24,10 +24,11 @@ final class InfiniteScrollModuleBuilder {
     }
 
     func build() -> UIViewController {
+        let feature = InfiniteScrollFeature()
         let store = Store<InfiniteScrollState, InfiniteScrollEvent, InfiniteScrollCommand, InfiniteScrollEnvironment>(
             state: InfiniteScrollState(),
-            reducer: InfiniteScrollFeature.getReducer(),
-            commandHandler: InfiniteScrollFeature.getCommandHandler(
+            reducer: feature.getReducer(),
+            commandHandler: feature.getCommandHandler(
                 environment: InfiniteScrollEnvironment(
                     infiniteScrollRepository: resolver.resolve(InfiniteScrollRepositoryProtocol.self)!,
                     moduleOutput: moduleOutput
@@ -37,8 +38,8 @@ final class InfiniteScrollModuleBuilder {
 
         let viewStore = ViewStore<InfiniteScrollViewState, InfiniteScrollViewEvent>(
             store: store,
-            eventMapper: InfiniteScrollFeature.getEventMapper(),
-            stateMapper: InfiniteScrollFeature.getStateMapper()
+            eventMapper: feature.getEventMapper(),
+            stateMapper: feature.getStateMapper()
         )
 
         let viewController = InfiniteScrollViewController(

@@ -1,4 +1,5 @@
 PODS:
+  - Sourcery/CLI-Only (1.8.1)
   - Swiftea (0.9.0)
   - Swiftea/Tests (0.9.0)
   - SwiftMessages (9.0.6):
@@ -7,6 +8,7 @@ PODS:
   - Swinject (2.8.1)
 
 DEPENDENCIES:
+  - Sourcery/CLI-Only
   - Swiftea (from `../../`)
   - Swiftea/Tests (from `../../`)
   - SwiftMessages
@@ -14,6 +16,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - Sourcery
     - SwiftMessages
     - Swinject
 
@@ -22,10 +25,11 @@ EXTERNAL SOURCES:
     :path: "../../"
 
 SPEC CHECKSUMS:
+  Sourcery: 4d44d4ea26a682a4a9875ec7c1870a1e7b8e183f
   Swiftea: 3099f2083b5bb2f11aaf6660cb6138545dd770c2
   SwiftMessages: f0c7ef4705a570ad6c5e208b611f4333e660ed92
   Swinject: 97112918bd7e0785dc2df7036213f3c8cbba6586
 
-PODFILE CHECKSUM: 61da38e66dd1c3c81e3f5dcab05b780750d70f18
+PODFILE CHECKSUM: df76741ebc4526391e6ad5af3b46fcd00356fe4f
 
 COCOAPODS: 1.11.3
