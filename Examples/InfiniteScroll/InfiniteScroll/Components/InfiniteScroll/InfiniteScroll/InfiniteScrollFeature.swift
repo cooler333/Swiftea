@@ -40,7 +40,7 @@ enum InfiniteScrollEvent: Equatable {
     case playbackScreenDidOpen
 }
 
-enum InfiniteScrollCommand: Equatable, Hashable {
+enum InfiniteScrollCommand: Equatable {
     case loadInitialPageData
     case loadNextPageData(page: Int)
     case cancelAllRequests

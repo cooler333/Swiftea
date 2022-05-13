@@ -8,7 +8,7 @@
 import Combine
 import Foundation
 
-public final class Store<State: Equatable, Event, Command: Equatable & Hashable, Environment> {
+public final class Store<State: Equatable, Event, Command: Equatable, Environment> {
     public let statePublisher = PassthroughSubject<State, Never>()
 
     private let internalStatePublisher: CurrentValueSubject<State, Never>
@@ -18,7 +18,7 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
     private let internalQueue = DispatchQueue(label: "internalQueue")
 
     private var cancellable: Set<AnyCancellable> = []
-    private var cancellableStorage: [Command: [AnyCancellable]] = [:]
+    private var cancellableStorage: [(cancellable: AnyCancellable, cancellableCommands: [Command])] = []
 
     public init(
         state: State,
@@ -81,12 +81,12 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
         }
 
         internalQueue.sync {
-            if let cancellables = self.cancellableStorage[command] {
-                for cancellable in cancellables {
-                    cancellable.cancel()
+            cancellableStorage
+                .filter { _, cancellableCommands in
+                    cancellableCommands.contains(command)
                 }
-            }
-            self.cancellableStorage[command] = nil
+                .map { $0.cancellable }
+                .forEach { $0.cancel() }
 
             let cancellable = commandHandler.dispatch(command: command)
                 .receive(on: DispatchQueue.main)
@@ -96,14 +96,7 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
                 }
             cancellable.store(in: &self.cancellable)
 
-            for cancellableCommand in cancellableCommands {
-                if command == cancellableCommand { continue }
-                if self.cancellableStorage[cancellableCommand] != nil {
-                    self.cancellableStorage[cancellableCommand]!.append(cancellable)
-                } else {
-                    self.cancellableStorage[cancellableCommand] = [cancellable]
-                }
-            }
+            cancellableStorage.append((cancellable, cancellableCommands))
         }
     }
 

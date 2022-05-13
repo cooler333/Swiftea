@@ -5,13 +5,13 @@ import XCTest
 @testable import Swiftea
 
 final class SwifteaTests: XCTestCase {
-    var cancellableStore: Set<AnyCancellable> = []
+    var cancellable: Set<AnyCancellable> = []
     var backgroundConcurrentQueue = DispatchQueue(label: "backgroundConcurrentQueue")
 
     override func tearDown() {
         super.tearDown()
 
-        cancellableStore.forEach { $0.cancel() }
+        cancellable.forEach { $0.cancel() }
     }
 
     // swiftlint:disable:next function_body_length
@@ -157,7 +157,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
@@ -327,7 +327,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
@@ -488,7 +488,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
@@ -654,7 +654,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
@@ -797,7 +797,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
@@ -953,7 +953,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
@@ -1116,7 +1116,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
@@ -1193,7 +1193,7 @@ final class SwifteaTests: XCTestCase {
             case receiveFinish
         }
 
-        enum Command: Equatable, Hashable {
+        enum Command: Equatable {
             case loadInitialData(value: Int)
             case loadNextData(value: Int)
             case finish
@@ -1291,7 +1291,7 @@ final class SwifteaTests: XCTestCase {
                 responsesExpectation.fulfill()
             }
         }
-        .store(in: &cancellableStore)
+        .store(in: &cancellable)
 
         store.dispatch(event: .loadInitial)
 
