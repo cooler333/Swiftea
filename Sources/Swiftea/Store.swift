@@ -12,14 +12,12 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
     public let statePublisher = PassthroughSubject<State, Never>()
 
     private let internalStatePublisher: CurrentValueSubject<State, Never>
-    private var commandQueue: [(command: Command, cancellableCommands: [Command])] = []
+    private let internalCommandPublisher: PassthroughSubject<(command: Command, cancellableCommands: [Command]), Never>
+    private let internalEventPublisher: PassthroughSubject<Event, Never>
 
     private let internalQueue = DispatchQueue(label: "internalQueue")
 
-    private let reducer: Reducer<State, Event, Command>
-    private let commandHandler: CommandHandler<Command, Event, Environment>
-
-    private var store: Set<AnyCancellable> = []
+    private var cancellable: Set<AnyCancellable> = []
     private var cancellableStorage: [Command: [AnyCancellable]] = [:]
 
     public init(
@@ -27,10 +25,13 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
         reducer: Reducer<State, Event, Command>,
         commandHandler: CommandHandler<Command, Event, Environment>
     ) {
-        self.reducer = reducer
-        self.commandHandler = commandHandler
+        if !Thread.isMainThread {
+            assertionFailure("Not main thread")
+        }
 
         internalStatePublisher = CurrentValueSubject<State, Never>(state)
+        internalCommandPublisher = PassthroughSubject<(command: Command, cancellableCommands: [Command]), Never>()
+        internalEventPublisher = PassthroughSubject<Event, Never>()
 
         internalStatePublisher
             .receive(on: DispatchQueue.main)
@@ -38,7 +39,28 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
                 guard let self = self else { return }
                 self.statePublisher.send(state)
             }
-            .store(in: &store)
+            .store(in: &cancellable)
+
+        internalCommandPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { commandAndCancellableCommands in
+                self.handle(
+                    command: commandAndCancellableCommands.command,
+                    cancellableCommands: commandAndCancellableCommands.cancellableCommands,
+                    commandHandler: commandHandler
+                )
+            }.store(in: &cancellable)
+
+        internalEventPublisher
+            .receive(on: DispatchQueue.main)
+            .map { [weak self] event -> Next<State, Command> in
+                guard let self = self else { fatalError() }
+                let state = self.internalStatePublisher.value
+                return reducer.dispatch(state: state, event: event)
+            }.sink { [weak self] next in
+                guard let self = self else { return }
+                self.handle(next: next)
+            }.store(in: &cancellable)
     }
 
     public func dispatch(event: Event) {
@@ -46,9 +68,43 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
             assertionFailure("Not main thread")
         }
 
-        let state = internalStatePublisher.value
-        let next = reducer.dispatch(state: state, event: event)
-        handle(next: next)
+        internalEventPublisher.send(event)
+    }
+
+    private func handle(
+        command: Command,
+        cancellableCommands: [Command],
+        commandHandler: CommandHandler<Command, Event, Environment>
+    ) {
+        if !Thread.isMainThread {
+            assertionFailure("Not main thread")
+        }
+
+        internalQueue.sync {
+            if let cancellables = self.cancellableStorage[command] {
+                for cancellable in cancellables {
+                    cancellable.cancel()
+                }
+            }
+            self.cancellableStorage[command] = nil
+
+            let cancellable = commandHandler.dispatch(command: command)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] event in
+                    guard let self = self else { return }
+                    self.dispatch(event: event)
+                }
+            cancellable.store(in: &self.cancellable)
+
+            for cancellableCommand in cancellableCommands {
+                if command == cancellableCommand { continue }
+                if self.cancellableStorage[cancellableCommand] != nil {
+                    self.cancellableStorage[cancellableCommand]!.append(cancellable)
+                } else {
+                    self.cancellableStorage[cancellableCommand] = [cancellable]
+                }
+            }
+        }
     }
 
     private func handle(next: Next<State, Command>) {
@@ -66,7 +122,7 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
         case let .dispatch(commands):
             commands.forEach { command in
                 internalQueue.async {
-                    self.commandQueue.append((command, []))
+                    self.internalCommandPublisher.send((command, []))
                 }
             }
 
@@ -74,14 +130,14 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
             internalStatePublisher.send(state)
             commands.forEach { command in
                 internalQueue.async {
-                    self.commandQueue.append((command, []))
+                    self.internalCommandPublisher.send((command, []))
                 }
             }
 
         case let .dispatchCancellable(commands, cancellableCommands):
             commands.forEach { command in
                 internalQueue.async {
-                    self.commandQueue.append((command, cancellableCommands))
+                    self.internalCommandPublisher.send((command, cancellableCommands))
                 }
             }
 
@@ -89,49 +145,7 @@ public final class Store<State: Equatable, Event, Command: Equatable & Hashable,
             internalStatePublisher.send(state)
             commands.forEach { command in
                 internalQueue.async {
-                    self.commandQueue.append((command, cancellableCommands))
-                }
-            }
-        }
-
-        handleCommands()
-    }
-
-    private func handleCommands() {
-        if !Thread.isMainThread {
-            assertionFailure("Not main thread")
-        }
-
-        internalQueue.sync {
-            if let commandItem = self.commandQueue.first {
-                self.commandQueue.remove(at: 0)
-
-                if let cancellables = self.cancellableStorage[commandItem.command] {
-                    for cancellable in cancellables {
-                        cancellable.cancel()
-                    }
-                }
-                self.cancellableStorage[commandItem.command] = nil
-
-                let cancellable = self.commandHandler.dispatch(command: commandItem.command)
-                    .receive(on: DispatchQueue.main)
-                    .sink { [weak self] event in
-                        guard let self = self else { return }
-                        self.dispatch(event: event)
-                    }
-                cancellable.store(in: &self.store)
-
-                for cancellableCommand in commandItem.cancellableCommands {
-                    if commandItem.command == cancellableCommand { continue }
-                    if self.cancellableStorage[cancellableCommand] != nil {
-                        self.cancellableStorage[cancellableCommand]!.append(cancellable)
-                    } else {
-                        self.cancellableStorage[cancellableCommand] = [cancellable]
-                    }
-                }
-
-                DispatchQueue.main.async {
-                    self.handleCommands()
+                    self.internalCommandPublisher.send((command, cancellableCommands))
                 }
             }
         }
