@@ -376,8 +376,7 @@ final class SwifteaTests: XCTestCase {
         let reducerReduce: (State, Event) -> Next<State, Command> = { state, event in
             switch event {
             case .loadInitial:
-                var state = state
-                return .nextAndDispatch(state, [.loadInitialData])
+                return .dispatch([.loadInitialData])
 
             case .loadNextPage:
                 return .dispatchCancellable(
@@ -534,8 +533,7 @@ final class SwifteaTests: XCTestCase {
         let reducerReduce: (State, Event) -> Next<State, Command> = { state, event in
             switch event {
             case .loadInitial:
-                var state = state
-                return .nextAndDispatch(state, [.loadInitialData])
+                return .dispatch([.loadInitialData])
 
             case .loadNextPage:
                 // Pass same state value to .next
