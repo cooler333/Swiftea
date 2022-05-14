@@ -16,14 +16,4 @@ public enum LCEPagedState<T: Collection & Equatable, K: Equatable>: Equatable {
     case loading(previousData: T, state: LCEPagedLoadingState)
     case content(data: T, isListEnded: Bool)
     case error(previousData: T, isListEnded: Bool, error: K)
-
-    public var isInitialLoading: Bool {
-        switch self {
-        case let .loading(data, _):
-            return data.isEmpty
-
-        case .content, .error:
-            return false
-        }
-    }
 }

@@ -32,7 +32,6 @@ enum InfiniteScrollEvent: Equatable {
     case updateDataWithError(error: InfiniteScrollAPIError)
 
     case forceRefreshData
-    case retryToLoadNextPage
     case receiveCancelAllRequests
 
     case selectInfiniteScrollAtIndex(index: Int)
@@ -48,7 +47,9 @@ enum InfiniteScrollCommand: Equatable {
     case openDetails(id: String)
 }
 
-struct InfiniteScrollAPIError: Error, Equatable {}
+enum InfiniteScrollAPIError: Error, Equatable {
+    case networkError
+}
 
 struct InfiniteScrollEnvironment {
     let pageLentgth = 15
@@ -101,21 +102,6 @@ struct InfiniteScrollFeature {
                 state.loadingState = .error(error)
 
                 return .next(state)
-
-            case .retryToLoadNextPage:
-                var state = state
-                state.loadingState = .nextPage
-
-                return .nextAndDispatchCancellable(
-                    state,
-                    commands: [
-                        .cancelAllRequests,
-                        .loadNextPageData(page: state.currentPage + 1),
-                    ],
-                    cancellableCommands: [
-                        .cancelAllRequests,
-                    ]
-                )
 
             case .forceRefreshData:
                 var state = state
@@ -185,7 +171,7 @@ struct InfiniteScrollFeature {
                         .updateInitialData(data: result, isListEnded: result.count < environment.pageLentgth)
                     }
                     .mapError { _ in
-                        InfiniteScrollAPIError()
+                        .networkError
                     }
                     .catch { error in
                         Just<InfiniteScrollEvent>(.updateDataWithError(error: error))
@@ -202,7 +188,7 @@ struct InfiniteScrollFeature {
                         .updateNextData(data: result, isListEnded: result.count < environment.pageLentgth)
                     }
                     .mapError { _ in
-                        InfiniteScrollAPIError()
+                        .networkError
                     }
                     .catch { error in
                         Just<InfiniteScrollEvent>(.updateDataWithError(error: error))

@@ -78,13 +78,6 @@ class InfiniteScrollTests: XCTestCase {
         // Arrange
         let finalExpectation = expectation(description: "final")
 
-        infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
-            let data = (0...14).map { index in
-                InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
-            }
-            promise(.success(data))
-        }).eraseToAnyPublisher()
-
         eventPublusher.sink { event in
             if event == .updateInitialData(
                 data: (0...14).map { index in
@@ -120,6 +113,12 @@ class InfiniteScrollTests: XCTestCase {
         }.store(in: &cancellable)
 
         // Act
+        infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+            let data = (0...14).map { index in
+                InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+            }
+            promise(.success(data))
+        }).eraseToAnyPublisher()
         viewStore.dispatch(.viewDidLoad)
 
         // Assert
@@ -170,13 +169,6 @@ class InfiniteScrollTests: XCTestCase {
         // Arrange
         let finalExpectation = expectation(description: "final")
 
-        infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
-            let data = (0...14).map { index in
-                InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
-            }
-            promise(.success(data))
-        }).eraseToAnyPublisher()
-
         eventPublusher.sink { event in
             if event == .updateInitialData(
                 data: (0...14).map { index in
@@ -212,6 +204,12 @@ class InfiniteScrollTests: XCTestCase {
         }.store(in: &cancellable)
 
         // Act
+        infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+            let data = (0...14).map { index in
+                InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+            }
+            promise(.success(data))
+        }).eraseToAnyPublisher()
         viewStore.dispatch(.viewDidLoad)
 
         // Assert
@@ -249,6 +247,291 @@ class InfiniteScrollTests: XCTestCase {
             InfiniteScrollViewState(
                 contentState: .content(
                     data: (15...20).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: true
+                )
+            ),
+        ]
+        XCTAssertEqual(states, referenseStates)
+    }
+
+    func testNextPageError() throws {
+        // Arrange
+        let finalExpectation = expectation(description: "final")
+
+        eventPublusher.sink { event in
+            if event == .updateInitialData(
+                data: (0...14).map { index in
+                    InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+                },
+                isListEnded: false
+            ) {
+                self.infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+                    promise(.failure(URLError(.notConnectedToInternet)))
+                }).eraseToAnyPublisher()
+                self.viewStore.dispatch(.viewWillScrollToLastItem)
+            }
+        }.store(in: &cancellable)
+
+        var states: [InfiniteScrollViewState] = []
+        viewStore.statePublisher.sink { state in
+            states.append(state)
+
+            let finalState = InfiniteScrollViewState(
+                contentState: .error(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false,
+                    error: .api
+                )
+            )
+            if state == finalState {
+                finalExpectation.fulfill()
+            }
+        }.store(in: &cancellable)
+
+        // Act
+        infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+            let data = (0...14).map { index in
+                InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+            }
+            promise(.success(data))
+        }).eraseToAnyPublisher()
+        viewStore.dispatch(.viewDidLoad)
+
+        // Assert
+        wait(for: [finalExpectation], timeout: 1)
+
+        let referenseStates: [InfiniteScrollViewState] = [
+            InfiniteScrollViewState(
+                contentState: .content(
+                    data: [],
+                    isListEnded: false
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .loading(
+                    previousData: [],
+                    state: .refresh
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .content(
+                    data: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .loading(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    state: .nextPage
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .error(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false,
+                    error: .api
+                )
+            ),
+        ]
+        XCTAssertEqual(states, referenseStates)
+    }
+
+    func testRefreshError() throws {
+        // Arrange
+        let finalExpectation = expectation(description: "final")
+
+        eventPublusher.sink { event in
+            if event == .updateInitialData(
+                data: (0...14).map { index in
+                    InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+                },
+                isListEnded: false
+            ) {
+                self.infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+                    promise(.failure(URLError(.notConnectedToInternet)))
+                }).eraseToAnyPublisher()
+                self.viewStore.dispatch(.viewDidPullToRefresh)
+            }
+        }.store(in: &cancellable)
+
+        var states: [InfiniteScrollViewState] = []
+        viewStore.statePublisher.sink { state in
+            states.append(state)
+
+            let finalState = InfiniteScrollViewState(
+                contentState: .error(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false,
+                    error: .api
+                )
+            )
+            if state == finalState {
+                finalExpectation.fulfill()
+            }
+        }.store(in: &cancellable)
+
+        // Act
+        infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+            let data = (0...14).map { index in
+                InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+            }
+            promise(.success(data))
+        }).eraseToAnyPublisher()
+        viewStore.dispatch(.viewDidLoad)
+
+        // Assert
+        wait(for: [finalExpectation], timeout: 1)
+
+        let referenseStates: [InfiniteScrollViewState] = [
+            InfiniteScrollViewState(
+                contentState: .content(
+                    data: [],
+                    isListEnded: false
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .loading(
+                    previousData: [],
+                    state: .refresh
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .content(
+                    data: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .loading(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    state: .refresh
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .error(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false,
+                    error: .api
+                )
+            ),
+        ]
+        XCTAssertEqual(states, referenseStates)
+    }
+
+    func testRetryLoadNextPageOnError() throws {
+        // Arrange
+        let finalExpectation = expectation(description: "final")
+
+        eventPublusher.sink { event in
+            if event == .updateInitialData(
+                data: (0...14).map { index in
+                    InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+                },
+                isListEnded: false
+            ) {
+                self.infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+                    promise(.failure(URLError(.notConnectedToInternet)))
+                }).eraseToAnyPublisher()
+                self.viewStore.dispatch(.viewWillScrollToLastItem)
+            }
+
+            if event == .updateDataWithError(error: .networkError) {
+                self.infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+                    let data = (15...20).map { index in
+                        InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    }
+                    promise(.success(data))
+                }).eraseToAnyPublisher()
+                self.viewStore.dispatch(.viewDidTapRetryNextPageLoading)
+            }
+        }.store(in: &cancellable)
+
+        var states: [InfiniteScrollViewState] = []
+        viewStore.statePublisher.sink { state in
+            states.append(state)
+
+            let finalState = InfiniteScrollViewState(
+                contentState: .content(
+                    data: (0...20).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: true
+                )
+            )
+            if state == finalState {
+                finalExpectation.fulfill()
+            }
+        }.store(in: &cancellable)
+
+        // Act
+        infiniteScrollRepository.getInfiniteScrollsWithPageLentgthReturnValue = Future<[InfiniteScrollModel], Error>({ promise in
+            let data = (0...14).map { index in
+                InfiniteScrollModel(title: "\(index)", subtitle: "", id: "", details: "")
+            }
+            promise(.success(data))
+        }).eraseToAnyPublisher()
+        viewStore.dispatch(.viewDidLoad)
+
+        // Assert
+        wait(for: [finalExpectation], timeout: 20)
+
+        let referenseStates: [InfiniteScrollViewState] = [
+            InfiniteScrollViewState(contentState: .content(data: [], isListEnded: false)),
+            InfiniteScrollViewState(contentState: .loading(previousData: [], state: InfiniteScroll.LCEPagedLoadingState.refresh)),
+            InfiniteScrollViewState(
+                contentState: .content(
+                    data: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .loading(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    state: .nextPage
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .error(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    isListEnded: false,
+                    error: .api
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .loading(
+                    previousData: (0...14).map { index in
+                        InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
+                    },
+                    state: .nextPage
+                )
+            ),
+            InfiniteScrollViewState(
+                contentState: .content(
+                    data: (0...20).map { index in
                         InfiniteScrollViewModel(title: "\(index)", subtitle: "", id: "", details: "")
                     },
                     isListEnded: true

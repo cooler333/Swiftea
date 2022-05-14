@@ -352,7 +352,6 @@ final class SwifteaTests: XCTestCase {
         struct State: Equatable {
             var page = 0
             var models: [Model] = []
-            var isInitialLoading = false
             var isFinished = false
         }
 
@@ -378,7 +377,6 @@ final class SwifteaTests: XCTestCase {
             switch event {
             case .loadInitial:
                 var state = state
-                state.isInitialLoading = true
                 return .nextAndDispatch(state, [.loadInitialData])
 
             case .loadNextPage:
@@ -390,7 +388,6 @@ final class SwifteaTests: XCTestCase {
             case let .receiveData(models):
                 var state = state
                 if state.page == 0 {
-                    state.isInitialLoading = false
                     state.models = models
                 } else {
                     state.models += models
@@ -513,7 +510,6 @@ final class SwifteaTests: XCTestCase {
         struct State: Equatable {
             var page = 0
             var models: [Model] = []
-            var isInitialLoading = false
             var isFinished = false
         }
 
@@ -539,7 +535,6 @@ final class SwifteaTests: XCTestCase {
             switch event {
             case .loadInitial:
                 var state = state
-                state.isInitialLoading = true
                 return .nextAndDispatch(state, [.loadInitialData])
 
             case .loadNextPage:
@@ -556,7 +551,6 @@ final class SwifteaTests: XCTestCase {
             case let .receiveData(models):
                 var state = state
                 if state.page == 0 {
-                    state.isInitialLoading = false
                     state.models = models
                 } else {
                     state.models += models
