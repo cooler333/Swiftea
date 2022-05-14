@@ -160,7 +160,7 @@ class InfiniteScrollTests: XCTestCase {
                     },
                     isListEnded: true
                 )
-            )
+            ),
         ]
         XCTAssertEqual(states, referenseStates)
     }

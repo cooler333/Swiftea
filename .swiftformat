@@ -1,4 +1,4 @@
---exclude "**/Pods","**/DerivedData","**/Tests"
+--exclude "**/Pods","**/DerivedData","**/Tests","**/*.generated.swift"
 --indent 4
 --ifdef no-indent
 --disable unusedArguments

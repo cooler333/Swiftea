@@ -7,6 +7,7 @@ excluded:
   - "**/Pods"
   - "**/DerivedData"
   - "**/Tests"
+  - "**/*.generated.swift"
 type_name:
   max_length:
     warning: 50
