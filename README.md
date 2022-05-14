@@ -1,7 +1,7 @@
 # Swiftea
 
-if you were looking for something like: 
-- TEA(The Elm Architecture)
+If you were looking for a something like this: 
+- TEA (The Elm Architecture)
 - MVU (Model-View-Update)
 - MVI (Model-View-Intent)
 - Redux-like
@@ -9,7 +9,7 @@ if you were looking for something like:
 - UDF (Unidirectional Data Flow)
 - e.t.c
 
-but on Swift... Then you have found it!
+...but on Swift. Then you have found it!
 
 Swiftea is implementation of TEA/MVU architecture pattern using Swift.
 
@@ -19,6 +19,7 @@ Swiftea is implementation of TEA/MVU architecture pattern using Swift.
 - Do not use 3rd party libraries
 - use Combine
 - 100% business logic code coverage
+- Lightweight: 2 structs, 1 enum, 2 final classes; less than 200 lines of code
 
 #### We're open to merge requests
 
