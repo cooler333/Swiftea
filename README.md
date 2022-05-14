@@ -53,6 +53,7 @@ Also you can integrate framework as SPM package
 - [ReCombine](https://github.com/ReCombine/ReCombine)
 - [Swift Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture)
 - [Tea In Swift](https://github.com/chriseidhof/tea-in-swift)
+- [SwiftRex](https://github.com/SwiftRex/SwiftRex)
 - [More](https://github.com/onmyway133/awesome-ios-architecture#unidirectional-data-flow)
 
 ## Author
