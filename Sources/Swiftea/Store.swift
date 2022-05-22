@@ -43,7 +43,8 @@ public final class Store<State: Equatable, Event, Command: Equatable, Environmen
 
         internalCommandPublisher
             .receive(on: DispatchQueue.main)
-            .sink { commandAndCancellableCommands in
+            .sink { [weak self] commandAndCancellableCommands in
+                guard let self = self else { return }
                 self.handle(
                     command: commandAndCancellableCommands.command,
                     cancellableCommands: commandAndCancellableCommands.cancellableCommands,
@@ -53,8 +54,7 @@ public final class Store<State: Equatable, Event, Command: Equatable, Environmen
 
         internalEventPublisher
             .receive(on: DispatchQueue.main)
-            .map { [weak self] event -> Next<State, Command> in
-                guard let self = self else { fatalError() }
+            .map { [unowned self] event -> Next<State, Command> in
                 let state = self.internalStatePublisher.value
                 return reducer.dispatch(state: state, event: event)
             }.sink { [weak self] next in
@@ -80,7 +80,8 @@ public final class Store<State: Equatable, Event, Command: Equatable, Environmen
             assertionFailure("Not main thread")
         }
 
-        internalQueue.sync {
+        internalQueue.sync { [weak self] in
+            guard let self = self else { return }
             cancellableStorage
                 .filter { _, cancellableCommands in
                     cancellableCommands.contains(command)
@@ -114,7 +115,8 @@ public final class Store<State: Equatable, Event, Command: Equatable, Environmen
 
         case let .dispatch(commands):
             commands.forEach { command in
-                internalQueue.async {
+                internalQueue.async { [weak self] in
+                    guard let self = self else { return }
                     self.internalCommandPublisher.send((command, []))
                 }
             }
@@ -122,14 +124,16 @@ public final class Store<State: Equatable, Event, Command: Equatable, Environmen
         case let .nextAndDispatch(state, commands):
             internalStatePublisher.send(state)
             commands.forEach { command in
-                internalQueue.async {
+                internalQueue.async { [weak self] in
+                    guard let self = self else { return }
                     self.internalCommandPublisher.send((command, []))
                 }
             }
 
         case let .dispatchCancellable(commands, cancellableCommands):
             commands.forEach { command in
-                internalQueue.async {
+                internalQueue.async { [weak self] in
+                    guard let self = self else { return }
                     self.internalCommandPublisher.send((command, cancellableCommands))
                 }
             }
@@ -137,7 +141,8 @@ public final class Store<State: Equatable, Event, Command: Equatable, Environmen
         case let .nextAndDispatchCancellable(state, commands, cancellableCommands):
             internalStatePublisher.send(state)
             commands.forEach { command in
-                internalQueue.async {
+                internalQueue.async { [weak self] in
+                    guard let self = self else { return }
                     self.internalCommandPublisher.send((command, cancellableCommands))
                 }
             }
