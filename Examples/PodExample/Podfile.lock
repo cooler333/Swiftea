@@ -1,6 +1,6 @@
 PODS:
-  - Swiftea (0.1.3)
-  - Swiftea/Tests (0.1.3)
+  - Swiftea (0.9.5)
+  - Swiftea/Tests (0.9.5)
   - SwiftFormat/CLI (0.49.7)
   - SwiftLint (0.47.1)
 
@@ -20,7 +20,7 @@ EXTERNAL SOURCES:
     :path: "../../"
 
 SPEC CHECKSUMS:
-  Swiftea: a3e5ec0f2c73b066a0eff52f2ddff9f69bc31d2d
+  Swiftea: f33a9bcd5ba8ef73d6585e61ffe4dfa3b2a9c12b
   SwiftFormat: b70e3c776a74c67ce8bd140425a8c86d4a843759
   SwiftLint: f80f1be7fa96d30e0aa68e58d45d4ea1ccaac519
 
